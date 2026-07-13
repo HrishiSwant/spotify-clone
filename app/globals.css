@@ -1,1 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+html, body { height: 100%; }
+body { font-family: system-ui, -apple-system, sans-serif; }
+
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #535353; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #b3b3b3; }
