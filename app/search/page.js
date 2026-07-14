@@ -1,100 +1,51 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { usePlayer } from "@/context/PlayerContext";
+'use client';
+import { useState, useEffect } from 'react';
+import SearchBar from '@/components/SearchBar';
+import TrackList from '@/components/TrackList';
+import PlaylistCard from '@/components/PlaylistCard';
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const { playTrack } = usePlayer();
-
-  const runSearch = useCallback(async (q) => {
-    if (!q.trim()) {
-      setResults([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/spotify?type=search&q=${encodeURIComponent(q)}`
-      );
-      const data = await res.json();
-      setResults(data?.tracks?.items || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [query, setQuery] = useState('');
+  const [tracks, setTracks] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
 
   useEffect(() => {
-    const t = setTimeout(() => runSearch(query), 400);
-    return () => clearTimeout(t);
-  }, [query, runSearch]);
-
-  async function handlePlay(track) {
-    try {
-      const yt = await fetch(
-        `/api/youtube?q=${encodeURIComponent(
-          `${track.name} ${track.artists?.[0]?.name}`
-        )}`
-      );
-      const ytData = await yt.json();
-      const videoId = ytData?.items?.[0]?.id?.videoId;
-      playTrack({
-        name: track.name,
-        artist: track.artists?.map((a) => a.name).join(", "),
-        image: track.album?.images?.[0]?.url,
-        videoId,
-      });
-    } catch (e) {
-      console.error(e);
+    if (!query.trim()) {
+      setTracks([]);
+      setPlaylists([]);
+      return;
     }
-  }
+    const t = setTimeout(() => {
+      fetch(`/api/spotify?action=search&q=${encodeURIComponent(query)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          setTracks(d.tracks?.items || []);
+          setPlaylists(d.playlists?.items || []);
+        })
+        .catch(() => {});
+    }, 400);
+    return () => clearTimeout(t);
+  }, [query]);
 
   return (
-    <div className="p-6 h-full overflow-y-auto">
-      <div className="sticky top-0 bg-neutral-900/95 backdrop-blur pb-4 z-10">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="What do you want to listen to?"
-          className="w-full max-w-md bg-white text-black rounded-full px-5 py-3 outline-none font-medium"
-          autoFocus
-        />
-      </div>
-
-      {loading && <p className="text-neutral-400 mt-4">Searching...</p>}
-
-      <div className="mt-4 space-y-1">
-        {results.map((track) => (
-          <div
-            key={track.id}
-            onClick={() => handlePlay(track)}
-            className="flex items-center gap-4 p-2 rounded-md hover:bg-neutral-800 cursor-pointer group"
-          >
-            <img
-              src={track.album?.images?.[track.album.images.length - 1]?.url}
-              alt={track.name}
-              className="w-12 h-12 object-cover rounded"
-            />
-            <div className="min-w-0">
-              <p className="font-semibold truncate">{track.name}</p>
-              <p className="text-sm text-neutral-400 truncate">
-                {track.artists?.map((a) => a.name).join(", ")}
-              </p>
-            </div>
-            <span className="ml-auto text-neutral-500 text-sm pr-3">
-              {Math.floor(track.duration_ms / 60000)}:
-              {String(
-                Math.floor((track.duration_ms % 60000) / 1000)
-              ).padStart(2, "0")}
-            </span>
+    <div className="space-y-8">
+      <SearchBar value={query} onChange={setQuery} />
+      {tracks.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Songs</h2>
+          <TrackList tracks={tracks} />
+        </section>
+      )}
+      {playlists.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Playlists</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {playlists.map((p) => (
+              <PlaylistCard key={p.id} item={p} />
+            ))}
           </div>
-        ))}
-      </div>
+        </section>
+      )}
     </div>
   );
 }
