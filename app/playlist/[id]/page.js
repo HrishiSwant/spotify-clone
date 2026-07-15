@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import TrackList from '@/components/TrackList';
 
+export const dynamic = 'force-dynamic';
 export default function PlaylistPage() {
   const { id } = useParams();
   const [playlist, setPlaylist] = useState(null);
