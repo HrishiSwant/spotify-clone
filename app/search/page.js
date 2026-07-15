@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import TrackList from '@/components/TrackList';
