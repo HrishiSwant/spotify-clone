@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import PlaylistCard from '@/components/PlaylistCard';
-
+export const dynamic = 'force-dynamic';
 export default function LibraryPage() {
   const [playlists, setPlaylists] = useState([]);
 
