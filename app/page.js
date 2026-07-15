@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import PlaylistCard from '@/components/PlaylistCard';
 import LoginButton from '@/components/LoginButton';
-
+export const dynamic = 'force-dynamic';
 export default function Home() {
   const { data: session, status } = useSession();
   const [featured, setFeatured] = useState([]);
