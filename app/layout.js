@@ -4,6 +4,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import Player from '@/components/Player';
 
+export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Spotify Clone',
   description: 'A Spotify replica built with Next.js'
