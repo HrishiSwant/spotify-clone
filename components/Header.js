@@ -31,7 +31,11 @@ export default function Header() {
           )}
           <span className="text-sm">{session.user?.name}</span>
           <button
-            onClick={() => signOut()}
+            onClick={() => 
+              signOut({
+                callbackUrl: "/",
+              })
+              }
             className="bg-neutral-800 hover:bg-neutral-700 rounded-full px-4 py-1 text-sm"
           >
             Log out
