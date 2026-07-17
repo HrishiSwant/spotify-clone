@@ -12,14 +12,21 @@ export default function PlaylistPage() {
 
   useEffect(() => {
     if (!id) return;
+    
     fetch(`/api/spotify?action=playlist&id=${id}`)
       .then((r) => r.json())
-      .then((d) => setPlaylist(d))
-      .catch(() => {});
-    fetch(`/api/spotify?action=playlistTracks&id=${id}`)
-      .then((r) => r.json())
-      .then((d) => setTracks((d.items || []).map((i) => i.track).filter(Boolean)))
-      .catch(() => {});
+      .then((d) => {
+        setPlaylist(d);
+
+        const track =
+          d.tracks?.items
+        ?.map((item) => item.track)
+        .filter(Boolean) || [];
+
+
+      setTracks(tracks);
+      })     
+      .catch(console.error);
   }, [id]);
 
   return (
