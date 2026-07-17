@@ -13,7 +13,7 @@ export default function Home() {
     if (!session?.accessToken) return;
     fetch('/api/spotify?action=featured')
       .then((r) => r.json())
-      .then((d) => setFeatured(d.playlists?.items || []))
+      .then((d) => setFeatured(d.playlists?.items || d.items || []))
       .catch(() => {});
     fetch('/api/spotify?action=newReleases')
       .then((r) => r.json())
