@@ -22,7 +22,6 @@ export default function PlaylistPage() {
 
         setPlaylist(data);
 
-        // Spotify can return different shapes.
         let list = [];
 
         if (Array.isArray(data.tracks?.items)) {
