@@ -22,7 +22,7 @@ export default function PlaylistPage() {
 
         const list =
           data.items
-            ?.map((i) => i.item || i.track)
+            ?.map((item) => item.track)
             .filter(Boolean) || [];
 
         setTracks(list);
