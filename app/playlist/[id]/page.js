@@ -33,7 +33,7 @@ export default function PlaylistPage() {
             .map((x) => x.track || x.item || x)
             .filter(Boolean);
         }
-
+        console.log("TRACK LIST:", list);
         setTracks(list);
       })
       .catch(console.error);
