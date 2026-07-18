@@ -18,12 +18,22 @@ export default function PlaylistPage() {
     fetch(`/api/spotify?action=playlist&id=${id}`)
       .then((r) => r.json())
       .then((data) => {
+        console.log("PLAYLIST DATA:", data);
+
         setPlaylist(data);
 
-        const list =
-          data.items
-            ?.map((item) => item.track)
-            .filter(Boolean) || [];
+        // Spotify can return different shapes.
+        let list = [];
+
+        if (Array.isArray(data.tracks?.items)) {
+          list = data.tracks.items
+            .map((x) => x.track || x.item || x)
+            .filter(Boolean);
+        } else if (Array.isArray(data.items)) {
+          list = data.items
+            .map((x) => x.track || x.item || x)
+            .filter(Boolean);
+        }
 
         setTracks(list);
       })
