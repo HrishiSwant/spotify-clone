@@ -1,31 +1,39 @@
 'use client';
 
-import { usePlayer as usePlayerContext } from '@/context/PlayerContext';
+import { usePlayer } from '@/context/PlayerContext';
 
-export default function usePlayer() {
-  const player = usePlayerContext();
+export default function usePlayerHook() {
+  const player = usePlayer();
 
   return {
     currentTrack: player.currentTrack,
+
     queue: player.queue,
-    currentIndex: player.currentIndex,
 
-    isPlaying: player.isPlaying,
+    playing: player.playing,
 
-    volume: player.volume,
     progress: player.progress,
     duration: player.duration,
 
-    playTrack: player.playTrack,
-    togglePlay: player.togglePlay,
+    volume: player.volume,
+    muted: player.muted,
 
-    playNext: player.playNext,
-    playPrevious: player.playPrevious,
+    shuffle: player.shuffle,
+    repeat: player.repeat,
+
+    playTrack: player.playTrack,
+
+    togglePlayback: player.togglePlayback,
+
+    nextTrack: player.nextTrack,
+    previousTrack: player.previousTrack,
+
+    seek: player.seek,
 
     setVolume: player.setVolume,
-    setProgress: player.setProgress,
-    setDuration: player.setDuration,
+    toggleMute: player.toggleMute,
 
-    audioRef: player.audioRef,
+    toggleShuffle: player.toggleShuffle,
+    toggleRepeat: player.toggleRepeat,
   };
 }
