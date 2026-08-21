@@ -1,0 +1,86 @@
+.spotify-card {
+  background: #181818;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color .25s ease;
+}
+
+.spotify-card:hover {
+  background: #282828;
+}
+
+.spotify-card-image {
+  position: relative;
+}
+
+.spotify-card-image img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+
+.spotify-card-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #1db954;
+  color: #000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transform: translateY(8px);
+
+  transition: .25s;
+}
+
+.spotify-card:hover .spotify-card-play {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.spotify-card-title {
+  margin-top: 16px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  color: white;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.spotify-card-subtitle {
+  margin-top: 8px;
+
+  color: #b3b3b3;
+
+  font-size: 14px;
+  line-height: 1.45;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  overflow: hidden;
+}
+
+.spotify-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+  gap: 24px;
+}
