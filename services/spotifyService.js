@@ -1,156 +1,80 @@
-const API = "/api/spotify";
+import useSpotify from '@/hooks/useSpotify';
 
-async function request(action, params = {}) {
-  const query = new URLSearchParams({
-    action,
-    ...params,
-  });
-
-  const res = await fetch(`${API}?${query.toString()}`, {
-    cache: "no-store",
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw data;
+class SpotifyService {
+  constructor() {
+    this.api = null;
   }
 
-  return data;
-}
+  initialize(api) {
+    this.api = api;
+  }
 
-const spotifyService = {
-  // ==========================
-  // USER
-  // ==========================
+  check() {
+    if (!this.api) {
+      throw new Error('SpotifyService not initialized.');
+    }
+  }
 
   me() {
-    return request("me");
-  },
+    this.check();
+    return this.api.me();
+  }
 
-  myPlaylists() {
-    return request("myPlaylists");
-  },
+  home() {
+    this.check();
 
-  savedTracks() {
-    return request("savedTracks");
-  },
-
-  topTracks() {
-    return request("topTracks");
-  },
-
-  topArtists() {
-    return request("topArtists");
-  },
-
-  recentlyPlayed() {
-    return request("recentlyPlayed");
-  },
-
-  followedArtists() {
-    return request("followedArtists");
-  },
-
-  // ==========================
-  // HOME
-  // ==========================
-
-  featured() {
-    return request("featured");
-  },
-
-  newReleases() {
-    return request("newReleases");
-  },
-
-  // ==========================
-  // PLAYLIST
-  // ==========================
+    return Promise.all([
+      this.api.featured(),
+      this.api.newReleases(),
+      this.api.categories(),
+    ]);
+  }
 
   playlist(id) {
-    return request("playlist", { id });
-  },
-
-  playlistTracks(id) {
-    return request("playlistTracks", { id });
-  },
-
-  playlistCover(id) {
-    return request("playlistCover", { id });
-  },
-
-  // ==========================
-  // ALBUM
-  // ==========================
+    this.check();
+    return this.api.playlist(id);
+  }
 
   album(id) {
-    return request("album", { id });
-  },
-
-  albumTracks(id) {
-    return request("albumTracks", { id });
-  },
-
-  // ==========================
-  // ARTIST
-  // ==========================
+    this.check();
+    return this.api.album(id);
+  }
 
   artist(id) {
-    return request("artist", { id });
-  },
+    this.check();
+    return this.api.artist(id);
+  }
 
   artistTopTracks(id) {
-    return request("artistTopTracks", { id });
-  },
+    this.check();
+    return this.api.artistTopTracks(id);
+  }
 
-  artistAlbums(id) {
-    return request("artistAlbums", { id });
-  },
+  likedSongs() {
+    this.check();
+    return this.api.savedTracks();
+  }
 
-  relatedArtists(id) {
-    return request("relatedArtists", { id });
-  },
+  myLibrary() {
+    this.check();
 
-  // ==========================
-  // SEARCH
-  // ==========================
+    return Promise.all([
+      this.api.myPlaylists(),
+      this.api.savedTracks(),
+    ]);
+  }
 
-  search(q) {
-    return request("search", { q });
-  },
+  search(query) {
+    this.check();
+    return this.api.search(query);
+  }
+}
 
-  searchTracks(q) {
-    return request("searchTracks", { q });
-  },
+const spotifyService = new SpotifyService();
 
-  searchArtists(q) {
-    return request("searchArtists", { q });
-  },
-
-  searchAlbums(q) {
-    return request("searchAlbums", { q });
-  },
-
-  searchPlaylists(q) {
-    return request("searchPlaylists", { q });
-  },
-
-  // ==========================
-  // PLAYER
-  // ==========================
-
-  player() {
-    return request("player");
-  },
-
-  currentlyPlaying() {
-    return request("currentlyPlaying");
-  },
-
-  devices() {
-    return request("devices");
-  },
-};
+export function initializeSpotifyService() {
+  const api = useSpotify();
+  spotifyService.initialize(api);
+}
 
 export default spotifyService;
