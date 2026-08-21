@@ -1,22 +1,27 @@
 'use client';
 
-import { useQueue as useQueueContext } from '@/context/QueueContext';
+import { useQueue } from '@/context/QueueContext';
 
-export default function useQueue() {
-  const queue = useQueueContext();
+export default function useQueueHook() {
+  const queue = useQueue();
 
   return {
     queue: queue.queue,
-    currentTrack: queue.currentTrack,
+
     currentIndex: queue.currentIndex,
 
+    currentTrack: queue.currentTrack,
+
     loadQueue: queue.loadQueue,
-    clearQueue: queue.clearQueue,
 
-    nextTrack: queue.nextTrack,
-    previousTrack: queue.previousTrack,
+    add: queue.add,
+    addNext: queue.addNext,
 
-    addToQueue: queue.addToQueue,
-    removeFromQueue: queue.removeFromQueue,
+    remove: queue.remove,
+
+    clear: queue.clear,
+
+    next: queue.next,
+    previous: queue.previous,
   };
 }
