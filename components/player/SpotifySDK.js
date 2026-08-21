@@ -4,43 +4,48 @@ import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { usePlayer } from '@/context/PlayerContext';
+import spotifyPlayer from '@/lib/spotify/player';
 
 export default function SpotifySDK() {
   const { data: session } = useSession();
 
   const {
     setDeviceId,
+    setCurrentTrack,
     setPlaying,
     setProgress,
     setDuration,
-    setCurrentTrack,
   } = usePlayer();
 
   useEffect(() => {
     if (!session?.accessToken) return;
 
-    function initializePlayer() {
+    let player;
+
+    async function initialize() {
       if (!window.Spotify) return;
 
-      const player = new window.Spotify.Player({
+      player = new window.Spotify.Player({
         name: 'Spotify Clone',
 
-        getOAuthToken: (cb) => {
-          cb(session.accessToken);
-        },
+        getOAuthToken: (cb) =>
+          cb(session.accessToken),
 
         volume: 0.8,
       });
 
       player.addListener(
         'ready',
-        ({ device_id }) => {
-          console.log(
-            'Spotify Device:',
-            device_id
-          );
-
+        async ({ device_id }) => {
           setDeviceId(device_id);
+
+          try {
+            await spotifyPlayer.transfer(
+              device_id
+            );
+          } catch (err) {
+            console.error(err);
+          }
         }
       );
 
@@ -55,31 +60,49 @@ export default function SpotifySDK() {
 
           setDuration(state.duration);
 
-          if (state.track_window.current_track) {
-            setCurrentTrack(
-              state.track_window.current_track
-            );
-          }
+          setCurrentTrack(
+            state.track_window.current_track
+          );
         }
       );
 
-      player.connect();
+      player.addListener(
+        'initialization_error',
+        console.error
+      );
+
+      player.addListener(
+        'authentication_error',
+        console.error
+      );
+
+      player.addListener(
+        'account_error',
+        console.error
+      );
+
+      player.addListener(
+        'playback_error',
+        console.error
+      );
+
+      await player.connect();
 
       window.spotifyPlayer = player;
     }
 
     if (window.Spotify) {
-      initializePlayer();
+      initialize();
     } else {
       window.addEventListener(
         'spotify-sdk-ready',
-        initializePlayer
+        initialize
       );
     }
 
     return () => {
-      if (window.spotifyPlayer) {
-        window.spotifyPlayer.disconnect();
+      if (player) {
+        player.disconnect();
       }
     };
   }, [session]);
