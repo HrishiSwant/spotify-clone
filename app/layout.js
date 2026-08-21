@@ -1,19 +1,46 @@
 import './globals.css';
-import Providers from '@/components/Providers';
-import Header from '@/components/Header';
+
+import { Inter } from 'next/font/google';
+
+import { SessionProvider } from 'next-auth/react';
+
+import { AuthProvider } from '@/context/AuthContext';
+import { PlayerProvider } from '@/context/PlayerContext';
+import { QueueProvider } from '@/context/QueueContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+
+import SpotifySDK from '@/components/player/SpotifySDK';
+
+const inter = Inter({
+  subsets: ['latin'],
+});
 
 export const metadata = {
-  title: 'Spotify Clone'
+  title: 'Spotify Clone',
+  description: 'Spotify Clone',
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}) {
   return (
     <html lang="en">
-      <body className="bg-black text-white">
-        <Providers>
-          <Header />
-          <main>{children}</main>
-        </Providers>
+      <body className={inter.className}>
+        <SessionProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <QueueProvider>
+                <PlayerProvider>
+
+                  <SpotifySDK />
+
+                  {children}
+
+                </PlayerProvider>
+              </QueueProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
