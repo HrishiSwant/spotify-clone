@@ -3,9 +3,9 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
-  useEffect,
 } from 'react';
 
 const ThemeContext = createContext(null);
@@ -14,7 +14,8 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('spotify-theme');
+    const saved =
+      localStorage.getItem('spotify-theme');
 
     if (saved) {
       setTheme(saved);
@@ -22,23 +23,26 @@ export function ThemeProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('spotify-theme', theme);
+    document.documentElement.dataset.theme =
+      theme;
 
-    document.documentElement.setAttribute(
-      'data-theme',
+    localStorage.setItem(
+      'spotify-theme',
       theme
     );
   }, [theme]);
 
-  const toggleTheme = () => {
+  function toggleTheme() {
     setTheme((prev) =>
       prev === 'dark' ? 'light' : 'dark'
     );
-  };
+  }
 
   const value = useMemo(
     () => ({
       theme,
+      dark: theme === 'dark',
+      light: theme === 'light',
       setTheme,
       toggleTheme,
     }),
