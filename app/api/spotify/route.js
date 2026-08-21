@@ -2,7 +2,13 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 import { authOptions } from "@/lib/auth";
-import { spotify } from "@/lib/spotify";
+
+import * as User from "@/lib/spotify/user";
+import * as Playlists from "@/lib/spotify/playlists";
+import * as Albums from "@/lib/spotify/albums";
+import * as Artists from "@/lib/spotify/artists";
+import * as Search from "@/lib/spotify/search";
+import * as Player from "@/lib/spotify/player";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -13,9 +19,13 @@ export async function GET(request) {
         success: false,
         message: "Unauthorized",
       },
-      { status: 401 }
+      {
+        status: 401,
+      }
     );
   }
+
+  const token = session.accessToken;
 
   const { searchParams } = new URL(request.url);
 
@@ -23,106 +33,140 @@ export async function GET(request) {
   const id = searchParams.get("id");
   const q = searchParams.get("q");
 
-  const token = session.accessToken;
-
   try {
-    let result = null;
+    let data;
 
     switch (action) {
+      // ==========================
+      // USER
+      // ==========================
+
       case "me":
-        result = await spotify.me(token);
-        break;
-
-      case "featured":
-        result = await spotify.featured(token);
-        break;
-
-      case "newReleases":
-        result = await spotify.newReleases(token);
-        break;
-
-      case "categories":
-        result = await spotify.categories(token);
-        break;
-
-      case "myPlaylists":
-        result = await spotify.myPlaylists(token);
-        break;
-
-      case "savedTracks":
-        result = await spotify.savedTracks(token);
-        break;
-
-      case "recentlyPlayed":
-        result = await spotify.recentlyPlayed(token);
+        data = await User.getCurrentUser(token);
         break;
 
       case "topTracks":
-        result = await spotify.topTracks(token);
+        data = await User.getTopTracks(token);
         break;
 
       case "topArtists":
-        result = await spotify.topArtists(token);
+        data = await User.getTopArtists(token);
         break;
+
+      case "recentlyPlayed":
+        data = await User.getRecentlyPlayed(token);
+        break;
+
+      case "savedTracks":
+        data = await User.getSavedTracks(token);
+        break;
+
+      case "myPlaylists":
+        data = await User.getUserPlaylists(token);
+        break;
+
+      case "followedArtists":
+        data = await User.getFollowedArtists(token);
+        break;
+
+      // ==========================
+      // HOME
+      // ==========================
+
+      case "featured":
+        data = await Playlists.getFeaturedPlaylists(token);
+        break;
+
+      case "newReleases":
+        data = await Albums.getNewReleases(token);
+        break;
+
+      // ==========================
+      // PLAYLIST
+      // ==========================
 
       case "playlist":
-        if (!id)
-          return NextResponse.json(
-            { success: false, message: "Playlist ID required" },
-            { status: 400 }
-          );
-
-        result = await spotify.playlist(token, id);
+        data = await Playlists.getPlaylist(token, id);
         break;
 
-      case "album":
-        if (!id)
-          return NextResponse.json(
-            { success: false, message: "Album ID required" },
-            { status: 400 }
-          );
+      case "playlistTracks":
+        data = await Playlists.getPlaylistTracks(token, id);
+        break;
 
-        result = await spotify.album(token, id);
+      case "playlistCover":
+        data = await Playlists.getPlaylistCover(token, id);
+        break;
+
+      // ==========================
+      // ALBUM
+      // ==========================
+
+      case "album":
+        data = await Albums.getAlbum(token, id);
         break;
 
       case "albumTracks":
-        if (!id)
-          return NextResponse.json(
-            { success: false, message: "Album ID required" },
-            { status: 400 }
-          );
-
-        result = await spotify.albumTracks(token, id);
+        data = await Albums.getAlbumTracks(token, id);
         break;
 
-      case "artist":
-        if (!id)
-          return NextResponse.json(
-            { success: false, message: "Artist ID required" },
-            { status: 400 }
-          );
+      // ==========================
+      // ARTIST
+      // ==========================
 
-        result = await spotify.artist(token, id);
+      case "artist":
+        data = await Artists.getArtist(token, id);
         break;
 
       case "artistTopTracks":
-        if (!id)
-          return NextResponse.json(
-            { success: false, message: "Artist ID required" },
-            { status: 400 }
-          );
-
-        result = await spotify.artistTopTracks(token, id);
+        data = await Artists.getArtistTopTracks(token, id);
         break;
 
-      case "search":
-        if (!q)
-          return NextResponse.json(
-            { success: false, message: "Search query required" },
-            { status: 400 }
-          );
+      case "artistAlbums":
+        data = await Artists.getArtistAlbums(token, id);
+        break;
 
-        result = await spotify.search(token, q);
+      case "relatedArtists":
+        data = await Artists.getRelatedArtists(token, id);
+        break;
+
+      // ==========================
+      // SEARCH
+      // ==========================
+
+      case "search":
+        data = await Search.searchSpotify(token, q);
+        break;
+
+      case "searchTracks":
+        data = await Search.searchTracks(token, q);
+        break;
+
+      case "searchArtists":
+        data = await Search.searchArtists(token, q);
+        break;
+
+      case "searchAlbums":
+        data = await Search.searchAlbums(token, q);
+        break;
+
+      case "searchPlaylists":
+        data = await Search.searchPlaylists(token, q);
+        break;
+
+      // ==========================
+      // PLAYER
+      // ==========================
+
+      case "player":
+        data = await Player.getPlaybackState(token);
+        break;
+
+      case "currentlyPlaying":
+        data = await Player.getCurrentlyPlaying(token);
+        break;
+
+      case "devices":
+        data = await Player.getAvailableDevices(token);
         break;
 
       default:
@@ -131,22 +175,22 @@ export async function GET(request) {
             success: false,
             message: "Invalid action",
           },
-          { status: 400 }
+          {
+            status: 400,
+          }
         );
     }
 
-    return NextResponse.json(result);
-  } catch (err) {
-    console.error(err);
-
+    return NextResponse.json(data);
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        status: err.status || 500,
-        message: err.message || "Spotify request failed",
+        status: error.status || 500,
+        message: error.message || "Spotify API Error",
       },
       {
-        status: err.status || 500,
+        status: error.status || 500,
       }
     );
   }
