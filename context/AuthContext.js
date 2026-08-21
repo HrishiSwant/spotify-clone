@@ -7,14 +7,16 @@ import {
 } from 'react';
 
 import {
-  useSession,
   signIn,
   signOut,
+  useSession,
 } from 'next-auth/react';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
+export function AuthProvider({
+  children,
+}) {
   const {
     data: session,
     status,
@@ -35,19 +37,14 @@ export function AuthProvider({ children }) {
 
       loading: status === 'loading',
 
-      login() {
-        return signIn('spotify');
-      },
+      login: () => signIn('spotify'),
 
-      logout() {
-        return signOut({
+      logout: () =>
+        signOut({
           callbackUrl: '/login',
-        });
-      },
+        }),
 
-      refresh() {
-        return update();
-      },
+      refreshSession: update,
     }),
     [session, status, update]
   );
