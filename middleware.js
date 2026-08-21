@@ -1,5 +1,14 @@
 export { default } from 'next-auth/middleware';
 
 export const config = {
-  matcher: ['/library/:path*', '/playlist/:path*']
+  matcher: [
+    '/',
+    '/search/:path*',
+    '/library/:path*',
+    '/playlist/:path*',
+    '/album/:path*',
+    '/artist/:path*',
+    '/liked/:path*',
+    '/profile/:path*',
+  ],
 };
