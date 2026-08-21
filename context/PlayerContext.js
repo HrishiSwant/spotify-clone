@@ -3,100 +3,166 @@
 import {
   createContext,
   useContext,
+  useMemo,
   useState,
-  useRef,
-  useCallback,
 } from 'react';
+
+import playerService from '@/services/playerService';
+import queueService from '@/services/queueService';
 
 const PlayerContext = createContext(null);
 
-export function PlayerProvider({ children }) {
-  const audioRef = useRef(null);
+export function PlayerProvider({
+  children,
+}) {
+  const [currentTrack, setCurrentTrack] =
+    useState(null);
 
-  const [currentTrack, setCurrentTrack] = useState(null);
   const [queue, setQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(-1);
 
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playing, setPlaying] =
+    useState(false);
 
-  const [volume, setVolume] = useState(1);
+  const [progress, setProgress] =
+    useState(0);
 
-  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] =
+    useState(0);
 
-  const [duration, setDuration] = useState(0);
+  const [volume, setVolumeState] =
+    useState(100);
 
-  const playTrack = useCallback((track, list = []) => {
+  const [muted, setMuted] =
+    useState(false);
+
+  const [shuffle, setShuffle] =
+    useState(false);
+
+  const [repeat, setRepeat] =
+    useState(false);
+
+  function playTrack(track, trackQueue = []) {
+    if (!track) return;
+
+    queueService.setQueue(trackQueue);
+    queueService.setCurrentTrack(track);
+
+    playerService.setQueue(trackQueue);
+    playerService.play(track);
+
+    setQueue(trackQueue);
     setCurrentTrack(track);
-    setQueue(list);
-
-    const index = list.findIndex(
-      (t) => t.id === track.id
-    );
-
-    setCurrentIndex(index);
+    setPlaying(true);
 
     setProgress(0);
     setDuration(track.duration_ms || 0);
+  }
 
-    setIsPlaying(true);
-  }, []);
+  function togglePlayback() {
+    if (playing) {
+      playerService.pause();
+    } else {
+      playerService.resume();
+    }
 
-  const togglePlay = useCallback(() => {
-    setIsPlaying((p) => !p);
-  }, []);
+    setPlaying(!playing);
+  }
 
-  const playNext = useCallback(() => {
-    if (!queue.length) return;
+  function nextTrack() {
+    const next = queueService.next();
 
-    const next = currentIndex + 1;
+    if (!next) return;
 
-    if (next >= queue.length) return;
+    playTrack(next, queue);
+  }
 
-    setCurrentIndex(next);
-    setCurrentTrack(queue[next]);
-    setDuration(queue[next].duration_ms || 0);
-    setProgress(0);
-    setIsPlaying(true);
-  }, [queue, currentIndex]);
+  function previousTrack() {
+    const previous =
+      queueService.previous();
 
-  const playPrevious = useCallback(() => {
-    if (!queue.length) return;
+    if (!previous) return;
 
-    const prev = currentIndex - 1;
+    playTrack(previous, queue);
+  }
 
-    if (prev < 0) return;
+  function seek(ms) {
+    playerService.seek(ms);
+    setProgress(ms);
+  }
 
-    setCurrentIndex(prev);
-    setCurrentTrack(queue[prev]);
-    setDuration(queue[prev].duration_ms || 0);
-    setProgress(0);
-    setIsPlaying(true);
-  }, [queue, currentIndex]);
+  function setVolume(volume) {
+    playerService.setVolume(volume);
+
+    setMuted(false);
+    setVolumeState(volume);
+  }
+
+  function toggleMute() {
+    if (muted) {
+      playerService.unmute();
+    } else {
+      playerService.mute();
+    }
+
+    setMuted(!muted);
+  }
+
+  function toggleShuffle() {
+    setShuffle(
+      queueService.toggleShuffle()
+    );
+  }
+
+  function toggleRepeat() {
+    setRepeat(
+      queueService.toggleRepeat()
+    );
+  }
+
+  const value = useMemo(
+    () => ({
+      currentTrack,
+      queue,
+
+      playing,
+      progress,
+      duration,
+
+      volume,
+      muted,
+
+      shuffle,
+      repeat,
+
+      playTrack,
+      togglePlayback,
+
+      nextTrack,
+      previousTrack,
+
+      seek,
+
+      setVolume,
+      toggleMute,
+
+      toggleShuffle,
+      toggleRepeat,
+    }),
+    [
+      currentTrack,
+      queue,
+      playing,
+      progress,
+      duration,
+      volume,
+      muted,
+      shuffle,
+      repeat,
+    ]
+  );
 
   return (
-    <PlayerContext.Provider
-      value={{
-        audioRef,
-
-        currentTrack,
-        queue,
-        currentIndex,
-
-        isPlaying,
-        volume,
-        progress,
-        duration,
-
-        setVolume,
-        setProgress,
-        setDuration,
-
-        playTrack,
-        togglePlay,
-        playNext,
-        playPrevious,
-      }}
-    >
+    <PlayerContext.Provider value={value}>
       {children}
     </PlayerContext.Provider>
   );
