@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import spotifyService from '@/services/spotifyService';
+import { useState } from 'react';
+
+import useSpotify from './useSpotify';
 
 export default function useSearch() {
+  const spotify = useSpotify();
+
   const [query, setQuery] = useState('');
 
   const [tracks, setTracks] = useState([]);
@@ -11,12 +14,11 @@ export default function useSearch() {
   const [albums, setAlbums] = useState([]);
   const [playlists, setPlaylists] = useState([]);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const [error, setError] = useState(null);
-
-  const search = useCallback(async (q) => {
-    if (!q?.trim()) {
+  async function search(text) {
+    if (!text.trim()) {
       setTracks([]);
       setArtists([]);
       setAlbums([]);
@@ -26,20 +28,24 @@ export default function useSearch() {
 
     try {
       setLoading(true);
-      setError(null);
 
-      const data = await spotifyService.search(q);
+      const result = await spotify.search(text);
 
-      setTracks(data.tracks?.items || []);
-      setArtists(data.artists?.items || []);
-      setAlbums(data.albums?.items || []);
-      setPlaylists(data.playlists?.items || []);
+      setTracks(result.tracks?.items || []);
+
+      setArtists(result.artists?.items || []);
+
+      setAlbums(result.albums?.items || []);
+
+      setPlaylists(
+        result.playlists?.items || []
+      );
     } catch (err) {
-      setError(err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
   return {
     query,
@@ -51,7 +57,6 @@ export default function useSearch() {
     playlists,
 
     loading,
-    error,
 
     search,
   };
