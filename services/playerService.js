@@ -1,97 +1,129 @@
 class PlayerService {
   constructor() {
     this.audio = null;
-    this.queue = [];
-    this.currentIndex = -1;
+
     this.currentTrack = null;
+    this.queue = [];
+
+    this.listeners = {};
+
+    this.volume = 100;
+    this.muted = false;
   }
 
-  setAudio(audio) {
-    this.audio = audio;
+  initialize(audioElement) {
+    this.audio = audioElement;
   }
 
-  loadQueue(queue = [], startIndex = 0) {
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+
+    this.listeners[event].push(callback);
+  }
+
+  emit(event, payload) {
+    (this.listeners[event] || []).forEach((cb) =>
+      cb(payload)
+    );
+  }
+
+  setQueue(queue = []) {
     this.queue = queue;
-    this.currentIndex = startIndex;
-    this.currentTrack = queue[startIndex] || null;
-
-    return this.currentTrack;
-  }
-
-  play(track = null) {
-    if (track) {
-      this.currentTrack = track;
-    }
-
-    if (this.audio) {
-      this.audio.play();
-    }
-
-    return this.currentTrack;
-  }
-
-  pause() {
-    if (this.audio) {
-      this.audio.pause();
-    }
-  }
-
-  toggle() {
-    if (!this.audio) return;
-
-    if (this.audio.paused) {
-      this.audio.play();
-    } else {
-      this.audio.pause();
-    }
-  }
-
-  next() {
-    if (this.currentIndex + 1 >= this.queue.length) {
-      return null;
-    }
-
-    this.currentIndex++;
-
-    this.currentTrack = this.queue[this.currentIndex];
-
-    return this.currentTrack;
-  }
-
-  previous() {
-    if (this.currentIndex <= 0) {
-      return null;
-    }
-
-    this.currentIndex--;
-
-    this.currentTrack = this.queue[this.currentIndex];
-
-    return this.currentTrack;
-  }
-
-  seek(seconds) {
-    if (!this.audio) return;
-
-    this.audio.currentTime = seconds;
-  }
-
-  setVolume(volume) {
-    if (!this.audio) return;
-
-    this.audio.volume = volume;
-  }
-
-  getCurrentTrack() {
-    return this.currentTrack;
   }
 
   getQueue() {
     return this.queue;
   }
 
-  getCurrentIndex() {
-    return this.currentIndex;
+  setCurrentTrack(track) {
+    this.currentTrack = track;
+    this.emit("trackchange", track);
+  }
+
+  getCurrentTrack() {
+    return this.currentTrack;
+  }
+
+  play(track) {
+    this.setCurrentTrack(track);
+    this.emit("play", track);
+  }
+
+  pause() {
+    this.emit("pause");
+  }
+
+  resume() {
+    this.emit("resume");
+  }
+
+  stop() {
+    this.emit("stop");
+  }
+
+  seek(ms) {
+    this.emit("seek", ms);
+  }
+
+  setVolume(volume) {
+    this.volume = volume;
+    this.emit("volume", volume);
+  }
+
+  getVolume() {
+    return this.volume;
+  }
+
+  mute() {
+    this.muted = true;
+    this.emit("mute", true);
+  }
+
+  unmute() {
+    this.muted = false;
+    this.emit("mute", false);
+  }
+
+  isMuted() {
+    return this.muted;
+  }
+
+  next() {
+    if (!this.currentTrack) return null;
+
+    const index = this.queue.findIndex(
+      (t) => t.id === this.currentTrack.id
+    );
+
+    if (index === -1) return null;
+
+    const nextTrack =
+      this.queue[index + 1] || null;
+
+    if (nextTrack) {
+      this.play(nextTrack);
+    }
+
+    return nextTrack;
+  }
+
+  previous() {
+    if (!this.currentTrack) return null;
+
+    const index = this.queue.findIndex(
+      (t) => t.id === this.currentTrack.id
+    );
+
+    if (index <= 0) return null;
+
+    const previousTrack =
+      this.queue[index - 1];
+
+    this.play(previousTrack);
+
+    return previousTrack;
   }
 }
 
