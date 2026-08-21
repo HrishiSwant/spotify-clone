@@ -3,68 +3,88 @@
 import {
   createContext,
   useContext,
+  useMemo,
   useState,
-  useCallback,
 } from 'react';
 
 const QueueContext = createContext(null);
 
 export function QueueProvider({ children }) {
   const [queue, setQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] =
+    useState(-1);
 
-  const loadQueue = useCallback((tracks, startIndex = 0) => {
-    setQueue(tracks || []);
+  function loadQueue(
+    tracks = [],
+    startIndex = 0
+  ) {
+    setQueue(tracks);
     setCurrentIndex(startIndex);
-  }, []);
+  }
 
-  const clearQueue = useCallback(() => {
-    setQueue([]);
-    setCurrentIndex(0);
-  }, []);
-
-  const nextTrack = useCallback(() => {
-    setCurrentIndex((prev) => {
-      if (prev + 1 >= queue.length) return prev;
-      return prev + 1;
-    });
-  }, [queue]);
-
-  const previousTrack = useCallback(() => {
-    setCurrentIndex((prev) => {
-      if (prev <= 0) return 0;
-      return prev - 1;
-    });
-  }, []);
-
-  const addToQueue = useCallback((track) => {
+  function add(track) {
     setQueue((prev) => [...prev, track]);
-  }, []);
+  }
 
-  const removeFromQueue = useCallback((id) => {
+  function addNext(track) {
+    setQueue((prev) => {
+      const copy = [...prev];
+      copy.splice(currentIndex + 1, 0, track);
+      return copy;
+    });
+  }
+
+  function remove(trackId) {
     setQueue((prev) =>
-      prev.filter((track) => track.id !== id)
+      prev.filter((t) => t.id !== trackId)
     );
-  }, []);
+  }
 
-  const currentTrack =
-    queue[currentIndex] || null;
+  function clear() {
+    setQueue([]);
+    setCurrentIndex(-1);
+  }
+
+  function next() {
+    if (currentIndex >= queue.length - 1)
+      return null;
+
+    setCurrentIndex((i) => i + 1);
+
+    return queue[currentIndex + 1];
+  }
+
+  function previous() {
+    if (currentIndex <= 0) return null;
+
+    setCurrentIndex((i) => i - 1);
+
+    return queue[currentIndex - 1];
+  }
+
+  const value = useMemo(
+    () => ({
+      queue,
+      currentIndex,
+
+      currentTrack:
+        queue[currentIndex] || null,
+
+      loadQueue,
+
+      add,
+      addNext,
+      remove,
+      clear,
+
+      next,
+      previous,
+    }),
+    [queue, currentIndex]
+  );
 
   return (
-    <QueueContext.Provider
-      value={{
-        queue,
-        currentTrack,
-        currentIndex,
-
-        loadQueue,
-        clearQueue,
-        nextTrack,
-        previousTrack,
-        addToQueue,
-        removeFromQueue,
-      }}
-    >
+    <QueueContext.Provider value={value}>
       {children}
     </QueueContext.Provider>
   );
