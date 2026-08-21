@@ -2,95 +2,61 @@
 
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { getImage, formatArtists } from '@/lib/utils';
+
+import usePlayback from '@/hooks/usePlayback';
+
+import {
+  getImage,
+} from '@/lib/utils';
 
 export default function PlaylistCard({
-  item,
-  type = 'playlist',
+  playlist,
 }) {
-  const image =
-    getImage(item.images) ||
-    item.album?.images?.[0]?.url ||
-    '/images/placeholder.png';
+  const playback = usePlayback();
 
-  let href = '/';
+  async function handlePlay(e) {
+    e.preventDefault();
+    e.stopPropagation();
 
-  switch (type) {
-    case 'track':
-      href = `/album/${item.album?.id}`;
-      break;
-
-    case 'artist':
-      href = `/artist/${item.id}`;
-      break;
-
-    case 'album':
-      href = `/album/${item.id}`;
-      break;
-
-    default:
-      href = `/playlist/${item.id}`;
+    await playback.playPlaylist(
+      playlist.uri,
+      0
+    );
   }
-
-  const subtitle =
-    type === 'track'
-      ? formatArtists(item.artists || [])
-      : type === 'artist'
-      ? 'Artist'
-      : item.description ||
-        item.owner?.display_name ||
-        '';
 
   return (
     <Link
-      href={href}
+      href={`/playlist/${playlist.id}`}
       className="group rounded-lg bg-[#181818] p-4 transition hover:bg-[#282828]"
     >
       <div className="relative">
+
         <img
-          src={image}
-          alt={item.name}
-          className="aspect-square w-full rounded-md object-cover shadow-lg"
+          src={getImage(
+            playlist.images
+          )}
+          alt={playlist.name}
+          className="aspect-square w-full rounded-md object-cover shadow-xl"
         />
 
         <button
-          className="
-            absolute
-            bottom-2
-            right-2
-            flex
-            h-12
-            w-12
-            translate-y-2
-            items-center
-            justify-center
-            rounded-full
-            bg-[#1ed760]
-            text-black
-            opacity-0
-            shadow-xl
-            transition-all
-            group-hover:translate-y-0
-            group-hover:opacity-100
-            hover:scale-105
-          "
+          onClick={handlePlay}
+          className="absolute bottom-2 right-2 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-xl transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-105"
         >
           <Play
             size={20}
             fill="currentColor"
           />
         </button>
+
       </div>
 
-      <div className="mt-4">
-        <h3 className="truncate font-bold">
-          {item.name}
-        </h3>
+      <h3 className="mt-4 truncate font-semibold text-white">
+        {playlist.name}
+      </h3>
 
-        <p className="mt-2 line-clamp-2 text-sm text-neutral-400">
-          {subtitle}
-        </p>
-      </div>
+      <p className="mt-2 line-clamp-2 text-sm text-neutral-400">
+        {playlist.description ||
+          'Spotify Playlist'}
+      </p>
     </Link>
-  );
-}
