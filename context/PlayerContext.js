@@ -29,51 +29,51 @@ export function PlayerProvider({ children }) {
   function playTrack(track, trackQueue = []) {
     setCurrentTrack(track);
     setQueue(trackQueue);
+
     setPlaying(true);
-    setDuration(track?.duration_ms || 0);
     setProgress(0);
+    setDuration(track?.duration_ms || 0);
   }
 
   async function togglePlayback() {
     if (!window.spotifyPlayer) return;
-
     await window.spotifyPlayer.togglePlay();
   }
 
   async function nextTrack() {
     if (!window.spotifyPlayer) return;
-
     await window.spotifyPlayer.nextTrack();
   }
 
   async function previousTrack() {
     if (!window.spotifyPlayer) return;
-
     await window.spotifyPlayer.previousTrack();
   }
 
-  async function seek(position) {
-    if (!window.spotifyPlayer) return;
+  async function seek(position, syncPlayer = true) {
+    setProgress(position);
 
-    await window.spotifyPlayer.seek(position);
+    if (syncPlayer && window.spotifyPlayer) {
+      await window.spotifyPlayer.seek(position);
+    }
   }
 
   async function setVolume(volume) {
     setVolumeState(volume);
 
-    if (!window.spotifyPlayer) return;
-
-    await window.spotifyPlayer.setVolume(volume / 100);
+    if (window.spotifyPlayer) {
+      await window.spotifyPlayer.setVolume(volume / 100);
+    }
   }
 
   async function toggleMute() {
+    if (!window.spotifyPlayer) return;
+
     if (muted) {
-      await setVolume(volume);
+      await window.spotifyPlayer.setVolume(volume / 100);
       setMuted(false);
     } else {
-      if (window.spotifyPlayer) {
-        await window.spotifyPlayer.setVolume(0);
-      }
+      await window.spotifyPlayer.setVolume(0);
       setMuted(true);
     }
   }
