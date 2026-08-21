@@ -3,25 +3,42 @@ import { NextResponse } from "next/server";
 
 import { authOptions } from "@/lib/auth";
 
-import * as User from "@/lib/spotify/user";
-import * as Playlists from "@/lib/spotify/playlists";
-import * as Albums from "@/lib/spotify/albums";
-import * as Artists from "@/lib/spotify/artists";
-import * as Search from "@/lib/spotify/search";
-import * as Player from "@/lib/spotify/player";
+const BASE_URL = "https://api.spotify.com/v1";
+
+async function spotifyFetch(endpoint, token, options = {}) {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    cache: "no-store",
+  });
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      message: data,
+    };
+  }
+
+  return data;
+}
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {
     return NextResponse.json(
-      {
-        success: false,
-        message: "Unauthorized",
-      },
-      {
-        status: 401,
-      }
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
     );
   }
 
@@ -34,164 +51,313 @@ export async function GET(request) {
   const q = searchParams.get("q");
 
   try {
-    let data;
-
     switch (action) {
-      // ==========================
-      // USER
-      // ==========================
-
       case "me":
-        data = await User.getCurrentUser(token);
-        break;
-
-      case "topTracks":
-        data = await User.getTopTracks(token);
-        break;
-
-      case "topArtists":
-        data = await User.getTopArtists(token);
-        break;
-
-      case "recentlyPlayed":
-        data = await User.getRecentlyPlayed(token);
-        break;
-
-      case "savedTracks":
-        data = await User.getSavedTracks(token);
-        break;
-
-      case "myPlaylists":
-        data = await User.getUserPlaylists(token);
-        break;
-
-      case "followedArtists":
-        data = await User.getFollowedArtists(token);
-        break;
-
-      // ==========================
-      // HOME
-      // ==========================
+        return NextResponse.json(
+          await spotifyFetch("/me", token)
+        );
 
       case "featured":
-        data = await Playlists.getFeaturedPlaylists(token);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            "/browse/featured-playlists?limit=20",
+            token
+          )
+        );
 
       case "newReleases":
-        data = await Albums.getNewReleases(token);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            "/browse/new-releases?limit=20",
+            token
+          )
+        );
 
-      // ==========================
-      // PLAYLIST
-      // ==========================
+      case "categories":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/browse/categories?limit=20",
+            token
+          )
+        );
 
       case "playlist":
-        data = await Playlists.getPlaylist(token, id);
-        break;
-
-      case "playlistTracks":
-        data = await Playlists.getPlaylistTracks(token, id);
-        break;
-
-      case "playlistCover":
-        data = await Playlists.getPlaylistCover(token, id);
-        break;
-
-      // ==========================
-      // ALBUM
-      // ==========================
+        return NextResponse.json(
+          await spotifyFetch(
+            `/playlists/${id}?market=from_token`,
+            token
+          )
+        );
 
       case "album":
-        data = await Albums.getAlbum(token, id);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            `/albums/${id}`,
+            token
+          )
+        );
 
       case "albumTracks":
-        data = await Albums.getAlbumTracks(token, id);
-        break;
-
-      // ==========================
-      // ARTIST
-      // ==========================
+        return NextResponse.json(
+          await spotifyFetch(
+            `/albums/${id}/tracks`,
+            token
+          )
+        );
 
       case "artist":
-        data = await Artists.getArtist(token, id);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            `/artists/${id}`,
+            token
+          )
+        );
 
       case "artistTopTracks":
-        data = await Artists.getArtistTopTracks(token, id);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            `/artists/${id}/top-tracks?market=from_token`,
+            token
+          )
+        );
 
-      case "artistAlbums":
-        data = await Artists.getArtistAlbums(token, id);
-        break;
+      case "savedTracks":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/tracks?limit=50",
+            token
+          )
+        );
 
-      case "relatedArtists":
-        data = await Artists.getRelatedArtists(token, id);
-        break;
+      case "myPlaylists":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/playlists?limit=50",
+            token
+          )
+        );
 
-      // ==========================
-      // SEARCH
-      // ==========================
+      case "recentlyPlayed":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/player/recently-played?limit=50",
+            token
+          )
+        );
+
+      case "topTracks":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/top/tracks?limit=20",
+            token
+          )
+        );
+
+      case "topArtists":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/top/artists?limit=20",
+            token
+          )
+        );
 
       case "search":
-        data = await Search.searchSpotify(token, q);
-        break;
-
-      case "searchTracks":
-        data = await Search.searchTracks(token, q);
-        break;
-
-      case "searchArtists":
-        data = await Search.searchArtists(token, q);
-        break;
-
-      case "searchAlbums":
-        data = await Search.searchAlbums(token, q);
-        break;
-
-      case "searchPlaylists":
-        data = await Search.searchPlaylists(token, q);
-        break;
-
-      // ==========================
-      // PLAYER
-      // ==========================
-
-      case "player":
-        data = await Player.getPlaybackState(token);
-        break;
-
-      case "currentlyPlaying":
-        data = await Player.getCurrentlyPlaying(token);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            `/search?q=${encodeURIComponent(
+              q
+            )}&type=track,artist,album,playlist&limit=20`,
+            token
+          )
+        );
 
       case "devices":
-        data = await Player.getAvailableDevices(token);
-        break;
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/player/devices",
+            token
+          )
+        );
+
+      case "currentPlayback":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/player",
+            token
+          )
+        );
+
+      case "currentlyPlaying":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/player/currently-playing",
+            token
+          )
+        );
+
+      case "queue":
+        return NextResponse.json(
+          await spotifyFetch(
+            "/me/player/queue",
+            token
+          )
+        );
 
       default:
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid action",
+            message: "Unknown action",
           },
           {
             status: 400,
           }
         );
     }
-
-    return NextResponse.json(data);
-  } catch (error) {
+  } catch (err) {
     return NextResponse.json(
+      err,
       {
-        success: false,
-        status: error.status || 500,
-        message: error.message || "Spotify API Error",
-      },
-      {
-        status: error.status || 500,
+        status: err.status || 500,
       }
     );
+  }
+}
+
+export async function PUT(request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.accessToken) {
+    return NextResponse.json(
+      { success: false },
+      { status: 401 }
+    );
+  }
+
+  const token = session.accessToken;
+
+  const { searchParams } = new URL(request.url);
+
+  const action = searchParams.get("action");
+
+  const body = await request
+    .json()
+    .catch(() => ({}));
+
+  try {
+    switch (action) {
+      case "transfer":
+        await spotifyFetch(
+          "/me/player",
+          token,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              device_ids: [body.deviceId],
+            }),
+          }
+        );
+        break;
+
+      case "play":
+        await spotifyFetch(
+          "/me/player/play",
+          token,
+          {
+            method: "PUT",
+            body: JSON.stringify(body),
+          }
+        );
+        break;
+
+      case "pause":
+        await spotifyFetch(
+          "/me/player/pause",
+          token,
+          {
+            method: "PUT",
+          }
+        );
+        break;
+
+      case "seek":
+        await spotifyFetch(
+          `/me/player/seek?position_ms=${searchParams.get(
+            "position"
+          )}`,
+          token,
+          {
+            method: "PUT",
+          }
+        );
+        break;
+
+      case "volume":
+        await spotifyFetch(
+          `/me/player/volume?volume_percent=${searchParams.get(
+            "volume"
+          )}`,
+          token,
+          {
+            method: "PUT",
+          }
+        );
+        break;
+    }
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (err) {
+    return NextResponse.json(err, {
+      status: err.status || 500,
+    });
+  }
+}
+
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.accessToken) {
+    return NextResponse.json(
+      {},
+      { status: 401 }
+    );
+  }
+
+  const token = session.accessToken;
+
+  const { searchParams } = new URL(request.url);
+
+  const action = searchParams.get("action");
+
+  try {
+    if (action === "next") {
+      await spotifyFetch(
+        "/me/player/next",
+        token,
+        {
+          method: "POST",
+        }
+      );
+    }
+
+    if (action === "previous") {
+      await spotifyFetch(
+        "/me/player/previous",
+        token,
+        {
+          method: "POST",
+        }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (err) {
+    return NextResponse.json(err, {
+      status: err.status || 500,
+    });
   }
 }
