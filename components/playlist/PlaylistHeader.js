@@ -1,59 +1,116 @@
 'use client';
 
-import { Clock3 } from 'lucide-react';
+import { Play, Clock3 } from 'lucide-react';
+
+import usePlayback from '@/hooks/usePlayback';
+
+import {
+  getImage,
+  formatFollowers,
+  formatDuration,
+} from '@/lib/utils';
 
 export default function PlaylistHeader({
   playlist,
-  trackCount = 0,
 }) {
+  const playback = usePlayback();
+
   if (!playlist) return null;
 
+  const tracks =
+    playlist.tracks?.items || [];
+
+  const totalDuration = tracks.reduce(
+    (sum, item) =>
+      sum + (item.track?.duration_ms || 0),
+    0
+  );
+
+  async function handlePlay() {
+    await playback.playPlaylist(
+      playlist.uri,
+      0
+    );
+  }
+
   return (
-    <section className="relative">
-      <div className="flex items-end gap-6 pb-8">
+    <div>
+
+      <div className="flex items-end gap-6 p-8">
+
         <img
-          src={
-            playlist.images?.[0]?.url ||
-            '/images/placeholder.png'
-          }
+          src={getImage(playlist.images)}
           alt={playlist.name}
-          className="w-60 h-60 rounded-md shadow-2xl object-cover"
+          className="h-60 w-60 rounded shadow-2xl object-cover"
         />
 
-        <div className="flex flex-col gap-3">
-          <span className="uppercase text-xs font-bold tracking-wider">
-            Playlist
-          </span>
+        <div>
 
-          <h1 className="text-6xl font-black tracking-tight">
+          <p className="text-sm font-semibold uppercase">
+            Playlist
+          </p>
+
+          <h1 className="mt-3 text-6xl font-black">
             {playlist.name}
           </h1>
 
           {playlist.description && (
-            <p className="text-neutral-300 max-w-3xl">
+            <p className="mt-5 text-neutral-300">
               {playlist.description}
             </p>
           )}
 
-          <div className="flex items-center gap-2 text-sm text-neutral-400">
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
+
             <span className="font-semibold text-white">
               {playlist.owner?.display_name}
             </span>
 
             <span>•</span>
 
-            <span>{trackCount} songs</span>
+            <span>
+              {formatFollowers(
+                playlist.followers?.total
+              )}{' '}
+              likes
+            </span>
+
+            <span>•</span>
+
+            <span>
+              {playlist.tracks?.total} songs
+            </span>
 
             <span>•</span>
 
             <Clock3 size={14} />
 
             <span>
-              {playlist.followers?.total?.toLocaleString?.() || 0}
+              {formatDuration(
+                totalDuration
+              )}
             </span>
+
           </div>
+
         </div>
+
       </div>
-    </section>
+
+      <div className="px-8 pb-6">
+
+        <button
+          onClick={handlePlay}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1DB954] text-black transition hover:scale-105"
+        >
+          <Play
+            fill="currentColor"
+            size={26}
+          />
+        </button>
+
+      </div>
+
+    </div>
   );
 }
