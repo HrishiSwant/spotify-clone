@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import spotifyService from '@/services/spotifyService';
+import client from '@/lib/spotify/client';
 
 export default function useSpotify() {
   // ==========================
@@ -9,31 +9,32 @@ export default function useSpotify() {
   // ==========================
 
   const me = useCallback(() => {
-    return spotifyService.me();
+    return client.get('me');
   }, []);
 
   const myPlaylists = useCallback(() => {
-    return spotifyService.myPlaylists();
+    return client.get('myPlaylists');
   }, []);
 
   const savedTracks = useCallback(() => {
-    return spotifyService.savedTracks();
+    return client.get('savedTracks');
   }, []);
 
   const topTracks = useCallback(() => {
-    return spotifyService.topTracks();
+    return client.get('topTracks');
   }, []);
 
   const topArtists = useCallback(() => {
-    return spotifyService.topArtists();
+    return client.get('topArtists');
   }, []);
 
   const recentlyPlayed = useCallback(() => {
-    return spotifyService.recentlyPlayed();
+    return client.get('recentlyPlayed');
   }, []);
 
+  // Spotify API route doesn't currently support this
   const followedArtists = useCallback(() => {
-    return spotifyService.followedArtists();
+    return Promise.resolve({ artists: { items: [] } });
   }, []);
 
   // ==========================
@@ -41,11 +42,15 @@ export default function useSpotify() {
   // ==========================
 
   const featured = useCallback(() => {
-    return spotifyService.featured();
+    return client.get('featured');
   }, []);
 
   const newReleases = useCallback(() => {
-    return spotifyService.newReleases();
+    return client.get('newReleases');
+  }, []);
+
+  const categories = useCallback(() => {
+    return client.get('categories');
   }, []);
 
   // ==========================
@@ -53,15 +58,17 @@ export default function useSpotify() {
   // ==========================
 
   const playlist = useCallback((id) => {
-    return spotifyService.playlist(id);
+    return client.byId('playlist', id);
   }, []);
 
+  // Not implemented in API route yet
   const playlistTracks = useCallback((id) => {
-    return spotifyService.playlistTracks(id);
+    return client.byId('playlist', id);
   }, []);
 
+  // Not implemented in API route yet
   const playlistCover = useCallback((id) => {
-    return spotifyService.playlistCover(id);
+    return client.byId('playlist', id);
   }, []);
 
   // ==========================
@@ -69,11 +76,11 @@ export default function useSpotify() {
   // ==========================
 
   const album = useCallback((id) => {
-    return spotifyService.album(id);
+    return client.byId('album', id);
   }, []);
 
   const albumTracks = useCallback((id) => {
-    return spotifyService.albumTracks(id);
+    return client.byId('albumTracks', id);
   }, []);
 
   // ==========================
@@ -81,19 +88,21 @@ export default function useSpotify() {
   // ==========================
 
   const artist = useCallback((id) => {
-    return spotifyService.artist(id);
+    return client.byId('artist', id);
   }, []);
 
   const artistTopTracks = useCallback((id) => {
-    return spotifyService.artistTopTracks(id);
+    return client.byId('artistTopTracks', id);
   }, []);
 
+  // Not implemented in API route yet
   const artistAlbums = useCallback((id) => {
-    return spotifyService.artistAlbums(id);
+    return client.byId('artist', id);
   }, []);
 
+  // Not implemented in API route yet
   const relatedArtists = useCallback((id) => {
-    return spotifyService.relatedArtists(id);
+    return client.byId('artist', id);
   }, []);
 
   // ==========================
@@ -101,23 +110,23 @@ export default function useSpotify() {
   // ==========================
 
   const search = useCallback((q) => {
-    return spotifyService.search(q);
+    return client.search(q);
   }, []);
 
   const searchTracks = useCallback((q) => {
-    return spotifyService.searchTracks(q);
+    return client.search(q);
   }, []);
 
   const searchArtists = useCallback((q) => {
-    return spotifyService.searchArtists(q);
+    return client.search(q);
   }, []);
 
   const searchAlbums = useCallback((q) => {
-    return spotifyService.searchAlbums(q);
+    return client.search(q);
   }, []);
 
   const searchPlaylists = useCallback((q) => {
-    return spotifyService.searchPlaylists(q);
+    return client.search(q);
   }, []);
 
   // ==========================
@@ -125,15 +134,15 @@ export default function useSpotify() {
   // ==========================
 
   const player = useCallback(() => {
-    return spotifyService.player();
+    return client.get('currentPlayback');
   }, []);
 
   const currentlyPlaying = useCallback(() => {
-    return spotifyService.currentlyPlaying();
+    return client.get('currentlyPlaying');
   }, []);
 
   const devices = useCallback(() => {
-    return spotifyService.devices();
+    return client.get('devices');
   }, []);
 
   return {
@@ -147,6 +156,7 @@ export default function useSpotify() {
 
     featured,
     newReleases,
+    categories,
 
     playlist,
     playlistTracks,
