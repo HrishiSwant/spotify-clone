@@ -2,14 +2,7 @@ import './globals.css';
 
 import { Inter } from 'next/font/google';
 
-import { SessionProvider } from 'next-auth/react';
-
-import { AuthProvider } from '@/context/AuthContext';
-import { PlayerProvider } from '@/context/PlayerContext';
-import { QueueProvider } from '@/context/QueueContext';
-import { ThemeProvider } from '@/context/ThemeContext';
-
-import SpotifySDK from '@/components/player/SpotifySDK';
+import Providers from '@/components/Providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,27 +13,13 @@ export const metadata = {
   description: 'Spotify Clone',
 };
 
-export default function RootLayout({
-  children,
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProvider>
-          <ThemeProvider>
-            <AuthProvider>
-              <QueueProvider>
-                <PlayerProvider>
-
-                  <SpotifySDK />
-
-                  {children}
-
-                </PlayerProvider>
-              </QueueProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </SessionProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
