@@ -2,23 +2,21 @@
 
 import { useEffect, useState } from 'react';
 
-import PlaylistGrid from '@/components/playlist/PlaylistGrid';
+import PlaylistCard from '@/components/playlist/PlaylistCard';
 
-import playlists from '@/lib/spotify/playlists';
+import user from '@/lib/spotify/user';
 
 export default function LibraryPage() {
-  const [items, setItems] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadLibrary() {
       try {
-        const data =
-          await playlists.myPlaylists();
-
-        setItems(data.items || []);
-      } catch (err) {
-        console.error(err);
+        const data = await user.playlists();
+        setPlaylists(data.items || []);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -36,16 +34,25 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="px-8 pt-8 pb-28">
-
-      <h1 className="mb-8 text-3xl font-bold">
+    <div className="p-8">
+      <h1 className="mb-8 text-4xl font-bold">
         Your Library
       </h1>
 
-      <PlaylistGrid
-        playlists={items}
-      />
-
+      {playlists.length === 0 ? (
+        <p className="text-neutral-400">
+          No playlists found.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-5">
+          {playlists.map((playlist) => (
+            <PlaylistCard
+              key={playlist.id}
+              playlist={playlist}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
