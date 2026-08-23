@@ -1,68 +1,41 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import useSpotify from '@/hooks/useSpotify';
-
 import PlaylistGrid from '@/components/playlist/PlaylistGrid';
 
-export default function HomePage() {
-  const spotify = useSpotify();
+import playlists from '@/lib/spotify/playlists';
+import albums from '@/lib/spotify/albums';
 
-  const [featured, setFeatured] = useState([]);
-  const [recent, setRecent] = useState([]);
-  const [topTracks, setTopTracks] = useState([]);
-  const [topArtists, setTopArtists] = useState([]);
-
-  useEffect(() => {
-    async function loadHome() {
-      try {
-        const [
-          featuredData,
-          recentData,
-          topTracksData,
-          topArtistsData,
-        ] = await Promise.all([
-          spotify.featured(),
-          spotify.myPlaylists(),
-          spotify.topTracks(),
-          spotify.topArtists(),
-        ]);
-
-        setFeatured(featuredData.items || []);
-        setRecent(recentData.items || []);
-        setTopTracks(topTracksData.items || []);
-        setTopArtists(topArtistsData.items || []);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    loadHome();
-  }, []);
+export default async function HomePage() {
+  const [featured, releases] = await Promise.all([
+    playlists.featured(),
+    albums.newReleases(),
+  ]);
 
   return (
-    <div className="space-y-12">
-      <PlaylistGrid
-        title="Featured Playlists"
-        items={featured}
-      />
+    <div className="pb-28">
 
-      <PlaylistGrid
-        title="Your Playlists"
-        items={recent}
-      />
+      <section className="px-8 pt-8">
+        <h1 className="mb-6 text-3xl font-bold text-white">
+          Good evening
+        </h1>
 
-      <PlaylistGrid
-        title="Top Tracks"
-        items={topTracks}
-        type="track"
-      />
+        <PlaylistGrid
+          playlists={
+            featured.playlists?.items || []
+          }
+        />
+      </section>
 
-      <PlaylistGrid
-        title="Top Artists"
-        items={topArtists}
-        type="artist"
-      />
+      <section className="mt-12 px-8">
+        <h2 className="mb-6 text-2xl font-bold text-white">
+          New Releases
+        </h2>
+
+        <PlaylistGrid
+          playlists={
+            releases.albums?.items || []
+          }
+        />
+      </section>
+
     </div>
   );
 }
