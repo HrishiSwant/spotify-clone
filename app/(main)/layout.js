@@ -9,6 +9,8 @@ import { PlayerProvider } from '@/context/PlayerContext';
 import { QueueProvider } from '@/context/QueueContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 
+import SpotifySDK from '@/components/player/SpotifySDK';
+
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -29,7 +31,11 @@ export default function RootLayout({
             <AuthProvider>
               <QueueProvider>
                 <PlayerProvider>
+
+                  <SpotifySDK />
+
                   {children}
+
                 </PlayerProvider>
               </QueueProvider>
             </AuthProvider>
