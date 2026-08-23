@@ -22,6 +22,13 @@ async function spotifyFetch(endpoint, token, options = {}) {
 
   console.log("Spotify Status:", response.status);
 
+console.log("Spotify Headers:");
+console.log(
+  Object.fromEntries(response.headers.entries())
+);
+
+  console.log("Spotify Status:", response.status);
+
   if (response.status === 204) {
     console.log("Spotify returned 204 No Content");
     return null;
@@ -201,16 +208,20 @@ export async function GET(request) {
         );
 
       case "search":
-        console.log("Searching:", q);
+  console.log("Searching:", q);
 
-        return NextResponse.json(
-          await spotifyFetch(
-            `/search?q=${encodeURIComponent(
-              q
-            )}&type=track&limit=20`,
-            token
-          )
-        );
+  const endpoint =
+    `/search?q=${encodeURIComponent(q)}&type=track`;
+
+  console.log("Final Search URL:");
+  console.log(`${BASE_URL}${endpoint}`);
+
+  return NextResponse.json(
+    await spotifyFetch(
+      endpoint,
+      token
+    )
+  );
 
       case "devices":
         console.log("Devices");
