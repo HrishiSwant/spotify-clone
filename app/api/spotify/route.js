@@ -60,7 +60,7 @@ export async function GET(request) {
       case "featured":
         return NextResponse.json(
           await spotifyFetch(
-            "/browse/featured-playlists?limit=20",
+            "/me/playlists?limit=20",
             token
           )
         );
@@ -164,9 +164,7 @@ export async function GET(request) {
       case "search":
         return NextResponse.json(
           await spotifyFetch(
-            `/search?q=${encodeURIComponent(
-              q
-            )}&type=track,artist,album,playlist&limit=20`,
+            `/search?q=${encodeURIComponent(q)}&type=track&limit=20`,
             token
           )
         );
