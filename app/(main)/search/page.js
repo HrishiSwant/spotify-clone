@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import useSearch from '@/hooks/useSearch';
 
 import PlaylistGrid from '@/components/playlist/PlaylistGrid';
+import PlaylistTracks from '@/components/playlist/PlaylistTracks';
 
 export default function SearchPage() {
   const {
@@ -12,8 +13,6 @@ export default function SearchPage() {
     setQuery,
 
     tracks,
-    artists,
-    albums,
     playlists,
 
     search,
@@ -29,18 +28,17 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <div className="space-y-10">
-      <div>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) =>
-            setQuery(e.target.value)
-          }
-          placeholder="What do you want to listen to?"
-          className="w-full rounded-full bg-white px-6 py-4 text-black text-lg outline-none"
-        />
-      </div>
+    <div className="pb-28 px-8 pt-8">
+
+      <input
+        type="text"
+        value={query}
+        onChange={(e) =>
+          setQuery(e.target.value)
+        }
+        placeholder="What do you want to listen to?"
+        className="mb-8 w-full rounded-full bg-[#242424] px-5 py-3 text-white outline-none placeholder:text-neutral-400"
+      />
 
       {loading && (
         <p className="text-neutral-400">
@@ -48,33 +46,31 @@ export default function SearchPage() {
         </p>
       )}
 
-      {!loading && (
+      {!loading && tracks.length > 0 && (
         <>
-          <PlaylistGrid
-            title="Songs"
-            items={tracks}
-            type="track"
-          />
+          <h2 className="mb-4 text-2xl font-bold">
+            Songs
+          </h2>
 
-          <PlaylistGrid
-            title="Artists"
-            items={artists}
-            type="artist"
-          />
-
-          <PlaylistGrid
-            title="Albums"
-            items={albums}
-            type="album"
-          />
-
-          <PlaylistGrid
-            title="Playlists"
-            items={playlists}
-            type="playlist"
+          <PlaylistTracks
+            tracks={tracks}
           />
         </>
       )}
+
+      {!loading &&
+        playlists.length > 0 && (
+          <>
+            <h2 className="mt-12 mb-4 text-2xl font-bold">
+              Playlists
+            </h2>
+
+            <PlaylistGrid
+              playlists={playlists}
+            />
+          </>
+        )}
+
     </div>
   );
 }
