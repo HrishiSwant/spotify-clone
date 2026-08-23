@@ -1,47 +1,27 @@
-import './globals.css';
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
+import Player from '@/components/player/Player';
 
-import { Inter } from 'next/font/google';
-
-import { SessionProvider } from 'next-auth/react';
-
-import { AuthProvider } from '@/context/AuthContext';
-import { PlayerProvider } from '@/context/PlayerContext';
-import { QueueProvider } from '@/context/QueueContext';
-import { ThemeProvider } from '@/context/ThemeContext';
-
-import SpotifySDK from '@/components/player/SpotifySDK';
-
-const inter = Inter({
-  subsets: ['latin'],
-});
-
-export const metadata = {
-  title: 'Spotify Clone',
-  description: 'Spotify Clone',
-};
-
-export default function RootLayout({
+export default function MainLayout({
   children,
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <SessionProvider>
-          <ThemeProvider>
-            <AuthProvider>
-              <QueueProvider>
-                <PlayerProvider>
+    <div className="flex h-screen bg-black text-white">
 
-                  <SpotifySDK />
+      <Sidebar />
 
-                  {children}
+      <div className="flex flex-1 flex-col overflow-hidden">
 
-                </PlayerProvider>
-              </QueueProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </SessionProvider>
-      </body>
-    </html>
+        <Header />
+
+        <main className="flex-1 overflow-y-auto pb-[90px]">
+          {children}
+        </main>
+
+      </div>
+
+      <Player />
+
+    </div>
   );
 }
