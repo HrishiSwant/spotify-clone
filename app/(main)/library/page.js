@@ -2,38 +2,21 @@
 
 import { useEffect, useState } from 'react';
 
-import useSpotify from '@/hooks/useSpotify';
-
 import PlaylistGrid from '@/components/playlist/PlaylistGrid';
 
+import playlists from '@/lib/spotify/playlists';
+
 export default function LibraryPage() {
-  const spotify = useSpotify();
-
-  const [playlists, setPlaylists] = useState([]);
-  const [savedTracks, setSavedTracks] = useState([]);
-
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadLibrary() {
       try {
-        setLoading(true);
+        const data =
+          await playlists.myPlaylists();
 
-        const [playlistData, likedData] =
-          await Promise.all([
-            spotify.myPlaylists(),
-            spotify.savedTracks(),
-          ]);
-
-        setPlaylists(
-          playlistData.items || []
-        );
-
-        setSavedTracks(
-          likedData.items
-            ?.map((item) => item.track)
-            .filter(Boolean) || []
-        );
+        setItems(data.items || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -47,23 +30,22 @@ export default function LibraryPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center text-neutral-400">
-        Loading library...
+        Loading your library...
       </div>
     );
   }
 
   return (
-    <div className="space-y-12">
-      <PlaylistGrid
-        title="Your Playlists"
-        items={playlists}
-      />
+    <div className="px-8 pt-8 pb-28">
+
+      <h1 className="mb-8 text-3xl font-bold">
+        Your Library
+      </h1>
 
       <PlaylistGrid
-        title="Liked Songs"
-        items={savedTracks}
-        type="track"
+        playlists={items}
       />
+
     </div>
   );
 }
