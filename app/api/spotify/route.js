@@ -6,6 +6,8 @@ import { authOptions } from "@/lib/auth";
 const BASE_URL = "https://api.spotify.com/v1";
 
 async function spotifyFetch(endpoint, token, options = {}) {
+  console.log("Spotify Request:", `${BASE_URL}${endpoint}`);
+  
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
