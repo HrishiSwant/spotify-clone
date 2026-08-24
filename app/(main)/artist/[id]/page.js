@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 
 import useSpotify from '@/hooks/useSpotify';
 
@@ -17,6 +17,7 @@ export default function ArtistPage() {
   const [tracks, setTracks] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -31,11 +32,16 @@ export default function ArtistPage() {
             spotify.artistTopTracks(id),
           ]);
 
-        setArtist(artistData);
+        if (!artistData || artistData.error) {
+          setError(true);
+          return;
+        }
 
+        setArtist(artistData);
         setTracks(topTracks.tracks || []);
       } catch (err) {
         console.error(err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -43,6 +49,10 @@ export default function ArtistPage() {
 
     loadArtist();
   }, [id]);
+
+  if (error) {
+    notFound();
+  }
 
   if (loading) {
     return (
@@ -60,12 +70,16 @@ export default function ArtistPage() {
           owner: {
             display_name: 'Artist',
           },
-          description: `${artist.followers?.total?.toLocaleString() || 0} followers`,
+          description: `${
+            artist.followers?.total?.toLocaleString() || 0
+          } followers`,
         }}
         trackCount={tracks.length}
       />
 
-      <PlaylistTracks tracks={tracks} />
+      <PlaylistTracks
+        tracks={tracks}
+      />
     </div>
   );
 }
