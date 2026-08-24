@@ -207,20 +207,34 @@ export async function GET(request) {
           )
         );
 
-      case "search":
+      case "search": {
   console.log("Searching:", q);
 
-  const endpoint =`/search?q=${encodeURIComponent(q)}&type=track,artist,album,playlist&limit=10`;
+  if (!q) {
+    return NextResponse.json({
+      tracks: { items: [] },
+      artists: { items: [] },
+      albums: { items: [] },
+      playlists: { items: [] },
+    });
+  }
+
+  const endpoint = `/search?q=${encodeURIComponent(
+    q
+  )}&type=track,artist,album,playlist&limit=10`;
 
   console.log("Final Search URL:");
   console.log(`${BASE_URL}${endpoint}`);
 
-  return NextResponse.json(
-    await spotifyFetch(
-      endpoint,
-      token
-    )
-  );
+  const result = await spotifyFetch(endpoint, token);
+
+  return NextResponse.json({
+    tracks: result?.tracks || { items: [] },
+    artists: result?.artists || { items: [] },
+    albums: result?.albums || { items: [] },
+    playlists: result?.playlists || { items: [] },
+  });
+}
 
       case "devices":
         console.log("Devices");
