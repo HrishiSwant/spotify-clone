@@ -40,7 +40,20 @@ export default function Header() {
               Log out
             </button>
 
-            <button className="flex items-center gap-2 bg-black rounded-full p-1 pr-3 hover:bg-neutral-800 transition">
+            <button
+  onClick={() => router.push('/profile')}
+  className="flex items-center gap-2 bg-black rounded-full p-1 pr-3 hover:bg-neutral-800 transition"
+>
+  <img
+    src={session.user.image}
+    alt={session.user.name}
+    className="w-8 h-8 rounded-full"
+  />
+
+  <span className="text-sm font-semibold">
+    {session.user.name}
+  </span>
+</button>
               <img
                 src={session.user.image}
                 alt={session.user.name}
