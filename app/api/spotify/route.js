@@ -210,8 +210,7 @@ export async function GET(request) {
       case "search":
   console.log("Searching:", q);
 
-  const endpoint =
-    `/search?q=${encodeURIComponent(q)}&type=track`;
+  const endpoint =`/search?q=${encodeURIComponent(q)}&type=track,artist,album,playlist&limit=10`;
 
   console.log("Final Search URL:");
   console.log(`${BASE_URL}${endpoint}`);
