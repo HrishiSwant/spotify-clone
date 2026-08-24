@@ -31,44 +31,57 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex items-center gap-8">
-        <img
-          src={
-            profile.images?.[0]?.url ||
-            '/images/avatar.png'
-          }
-          alt={profile.display_name}
-          className="w-52 h-52 rounded-full object-cover shadow-2xl"
-        />
+    <div className="pb-28">
 
-        <div>
-          <p className="uppercase text-sm font-bold tracking-widest">
-            Profile
-          </p>
+      <div className="bg-gradient-to-b from-purple-700 to-[#121212] px-8 py-12">
 
-          <h1 className="text-6xl font-black mt-2">
-            {profile.display_name}
-          </h1>
+        <div className="flex items-end gap-8">
 
-          <div className="mt-5 space-y-2 text-neutral-400">
-            <p>Email: {profile.email}</p>
+          <img
+            src={
+              profile.images?.[0]?.url ||
+              '/images/avatar.png'
+            }
+            alt={profile.display_name}
+            className="h-52 w-52 rounded-full object-cover shadow-2xl"
+          />
 
-            <p>
-              Country: {profile.country}
+          <div>
+
+            <p className="text-sm font-bold uppercase tracking-widest">
+              Profile
             </p>
 
-            <p>
-              Product: {profile.product}
+            <h1 className="mt-3 text-6xl font-black">
+              {profile.display_name}
+            </h1>
+
+            <div className="mt-5 flex flex-wrap gap-6 text-neutral-300">
+
+              <span>
+                {profile.followers?.total?.toLocaleString()} Followers
+              </span>
+
+              <span>
+                {profile.country}
+              </span>
+
+              <span>
+                {profile.product}
+              </span>
+
+            </div>
+
+            <p className="mt-4 text-neutral-400">
+              {profile.email}
             </p>
 
-            <p>
-              Followers:{' '}
-              {profile.followers?.total?.toLocaleString()}
-            </p>
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
