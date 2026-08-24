@@ -34,10 +34,15 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="mb-8 text-4xl font-bold">
+    <div className="p-8 pb-28">
+
+      <h1 className="text-4xl font-bold">
         Your Library
       </h1>
+
+      <p className="mb-8 mt-2 text-neutral-400">
+        {playlists.length} playlist{playlists.length !== 1 ? 's' : ''}
+      </p>
 
       {playlists.length === 0 ? (
         <p className="text-neutral-400">
@@ -53,6 +58,7 @@ export default function LibraryPage() {
           ))}
         </div>
       )}
+
     </div>
   );
 }
