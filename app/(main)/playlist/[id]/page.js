@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation';
+
 import PlaylistHeader from '@/components/playlist/PlaylistHeader';
 import PlaylistTracks from '@/components/playlist/PlaylistTracks';
 
@@ -9,6 +11,10 @@ export default async function PlaylistPage({
   const playlist = await playlists.playlist(
     params.id
   );
+
+  if (!playlist || playlist.error) {
+    notFound();
+  }
 
   return (
     <div className="pb-28">
