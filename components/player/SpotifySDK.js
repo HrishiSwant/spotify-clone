@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { usePlayer } from '@/context/PlayerContext';
 import spotifyPlayer from '@/lib/spotify/player';
 
-export default function SpotifySDK() {
+export default function SpotifyPlayer() {
   const { data: session } = useSession();
 
   const {
