@@ -7,7 +7,7 @@ import {
   Mic2,
 } from 'lucide-react';
 
-import SpotifyPlayer from './SpotifyPlayer';
+import SpotifyPlayer from './SpotifySDK';
 import Controls from './Controls';
 import ProgressBar from './ProgressBar';
 import VolumeSlider from './VolumeSlider';
@@ -23,7 +23,7 @@ export default function Player() {
 
   return (
     <>
-      <SpotifyPlayer />
+      <SpotifySDK />
 
       {!currentTrack ? null : (
         <footer className="fixed bottom-0 left-0 right-0 z-50 h-[90px] border-t border-neutral-800 bg-[#181818]">
