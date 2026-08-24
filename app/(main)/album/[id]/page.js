@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 
 import useSpotify from '@/hooks/useSpotify';
 
@@ -17,6 +17,7 @@ export default function AlbumPage() {
   const [tracks, setTracks] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -31,11 +32,16 @@ export default function AlbumPage() {
             spotify.albumTracks(id),
           ]);
 
-        setAlbum(albumData);
+        if (!albumData || albumData.error) {
+          setError(true);
+          return;
+        }
 
+        setAlbum(albumData);
         setTracks(trackData.items || []);
       } catch (err) {
         console.error(err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -43,6 +49,10 @@ export default function AlbumPage() {
 
     loadAlbum();
   }, [id]);
+
+  if (error) {
+    notFound();
+  }
 
   if (loading) {
     return (
@@ -67,7 +77,10 @@ export default function AlbumPage() {
         trackCount={tracks.length}
       />
 
-      <PlaylistTracks tracks={tracks} />
+      <PlaylistTracks
+        tracks={tracks}
+        contextUri={album.uri}
+      />
     </div>
   );
 }
