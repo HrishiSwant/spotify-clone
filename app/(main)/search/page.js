@@ -21,11 +21,15 @@ export default function SearchPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      search(query);
+      search(query.trim());
     }, 300);
 
     return () => clearTimeout(timer);
   }, [query]);
+
+  const hasResults =
+    tracks.length > 0 ||
+    playlists.length > 0;
 
   return (
     <div className="pb-28 px-8 pt-8">
@@ -45,6 +49,14 @@ export default function SearchPage() {
           Searching...
         </p>
       )}
+
+      {!loading &&
+        query.trim() !== '' &&
+        !hasResults && (
+          <p className="text-neutral-400">
+            No results found.
+          </p>
+        )}
 
       {!loading && tracks.length > 0 && (
         <>
