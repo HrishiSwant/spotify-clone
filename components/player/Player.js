@@ -23,16 +23,15 @@ export default function Player() {
 
   return (
     <>
-      <SpotifySDK />
+      {/* Spotify Web Playback SDK */}
+      <SpotifyPlayer />
 
       {!currentTrack ? null : (
         <footer className="fixed bottom-0 left-0 right-0 z-50 h-[90px] border-t border-neutral-800 bg-[#181818]">
           <div className="grid h-full grid-cols-[320px_1fr_320px] items-center px-4">
 
             {/* LEFT */}
-
             <div className="flex items-center gap-4 overflow-hidden">
-
               <img
                 src={getImage(currentTrack.album?.images)}
                 alt={currentTrack.name}
@@ -52,23 +51,16 @@ export default function Player() {
               <button className="text-neutral-400 hover:text-white">
                 <Heart size={18} />
               </button>
-
             </div>
 
             {/* CENTER */}
-
             <div className="flex flex-col items-center justify-center">
-
               <Controls />
-
               <ProgressBar />
-
             </div>
 
             {/* RIGHT */}
-
             <div className="flex items-center justify-end gap-4">
-
               <button className="text-neutral-400 hover:text-white">
                 <Mic2 size={18} />
               </button>
@@ -82,7 +74,6 @@ export default function Player() {
               </button>
 
               <VolumeSlider />
-
             </div>
 
           </div>
