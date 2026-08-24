@@ -10,24 +10,26 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 bg-[#121212]/90 backdrop-blur-md border-b border-white/5">
+      {/* Left */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => router.back()}
-          className="w-8 h-8 rounded-full bg-black hover:bg-neutral-800 flex items-center justify-center transition"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-black transition hover:bg-neutral-800"
         >
           <ChevronLeft size={18} />
         </button>
 
         <button
           onClick={() => router.forward()}
-          className="w-8 h-8 rounded-full bg-black hover:bg-neutral-800 flex items-center justify-center transition"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-black transition hover:bg-neutral-800"
         >
           <ChevronRight size={18} />
         </button>
       </div>
 
+      {/* Right */}
       <div className="flex items-center gap-4">
-        <button className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center transition">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 transition hover:bg-neutral-700">
           <Bell size={18} />
         </button>
 
@@ -35,32 +37,22 @@ export default function Header() {
           <>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:scale-105 transition"
+              className="rounded-full bg-white px-4 py-2 font-semibold text-black transition hover:scale-105"
             >
               Log out
             </button>
 
             <button
-  onClick={() => router.push('/profile')}
-  className="flex items-center gap-2 bg-black rounded-full p-1 pr-3 hover:bg-neutral-800 transition"
->
-  <img
-    src={session.user.image}
-    alt={session.user.name}
-    className="w-8 h-8 rounded-full"
-  />
-
-  <span className="text-sm font-semibold">
-    {session.user.name}
-  </span>
-</button>
+              onClick={() => router.push('/profile')}
+              className="flex items-center gap-2 rounded-full bg-black p-1 pr-3 transition hover:bg-neutral-800"
+            >
               <img
-                src={session.user.image}
-                alt={session.user.name}
-                className="w-8 h-8 rounded-full"
+                src={session.user.image || '/default-avatar.png'}
+                alt={session.user.name || 'Profile'}
+                className="h-8 w-8 rounded-full"
               />
 
-              <span className="text-sm font-semibold">
+              <span className="text-sm font-semibold text-white">
                 {session.user.name}
               </span>
             </button>
