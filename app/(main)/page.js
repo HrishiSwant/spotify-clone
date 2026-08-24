@@ -2,11 +2,19 @@ import PlaylistGrid from '@/components/playlist/PlaylistGrid';
 
 import playlists from '@/lib/spotify/playlists';
 import albums from '@/lib/spotify/albums';
+import user from '@/lib/spotify/user';
 
 export default async function HomePage() {
-  const [featured, releases] = await Promise.all([
+  const [
+    featured,
+    releases,
+    topTracks,
+    topArtists,
+  ] = await Promise.all([
     playlists.featured(),
     albums.newReleases(),
+    user.topTracks(),
+    user.topArtists(),
   ]);
 
   return (
@@ -32,6 +40,30 @@ export default async function HomePage() {
         <PlaylistGrid
           playlists={
             releases.albums?.items || []
+          }
+        />
+      </section>
+
+      <section className="mt-12 px-8">
+        <h2 className="mb-6 text-2xl font-bold text-white">
+          Your Top Tracks
+        </h2>
+
+        <PlaylistGrid
+          playlists={
+            topTracks.items || []
+          }
+        />
+      </section>
+
+      <section className="mt-12 px-8">
+        <h2 className="mb-6 text-2xl font-bold text-white">
+          Your Top Artists
+        </h2>
+
+        <PlaylistGrid
+          playlists={
+            topArtists.items || []
           }
         />
       </section>
