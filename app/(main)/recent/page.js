@@ -15,7 +15,11 @@ export default function RecentlyPlayedPage() {
       try {
         const data = await user.recentlyPlayed();
 
-        setTracks(data.items || []);
+        setTracks(
+          (data.items || [])
+            .map((item) => item.track)
+            .filter(Boolean)
+        );
       } catch (error) {
         console.error(error);
       } finally {
