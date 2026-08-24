@@ -60,11 +60,15 @@ export default function LikedSongsPage() {
           followers: {
             total: tracks.length,
           },
+          uri: 'spotify:user:liked',
         }}
         trackCount={tracks.length}
       />
 
-      <PlaylistTracks tracks={tracks} />
+      <PlaylistTracks
+        tracks={tracks}
+        contextUri="spotify:user:liked"
+      />
     </div>
   );
 }
