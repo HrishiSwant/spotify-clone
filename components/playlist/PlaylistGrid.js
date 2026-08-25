@@ -6,15 +6,14 @@ export default function PlaylistGrid({
   playlists = [],
 }) {
   const validPlaylists = playlists.filter(
-    (playlist) => playlist && playlist.id
+    (playlist) =>
+      playlist &&
+      playlist.id &&
+      playlist.uri
   );
 
   if (!validPlaylists.length) {
-    return (
-      <div className="py-16 text-center text-neutral-500">
-        No playlists found.
-      </div>
-    );
+    return null;
   }
 
   return (
