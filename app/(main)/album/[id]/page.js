@@ -3,15 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, notFound } from 'next/navigation';
 
-import useSpotify from '@/hooks/useSpotify';
+import albums from '@/lib/spotify/albums';
 
 import PlaylistHeader from '@/components/playlist/PlaylistHeader';
 import PlaylistTracks from '@/components/playlist/PlaylistTracks';
 
 export default function AlbumPage() {
   const { id } = useParams();
-
-  const spotify = useSpotify();
 
   const [album, setAlbum] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -28,8 +26,8 @@ export default function AlbumPage() {
 
         const [albumData, trackData] =
           await Promise.all([
-            spotify.album(id),
-            spotify.albumTracks(id),
+            albums.album(id),
+            albums.albumTracks(id),
           ]);
 
         if (!albumData || albumData.error) {
@@ -38,7 +36,7 @@ export default function AlbumPage() {
         }
 
         setAlbum(albumData);
-        setTracks(trackData.items || []);
+        setTracks(trackData?.items || []);
       } catch (err) {
         console.error(err);
         setError(true);
@@ -63,18 +61,25 @@ export default function AlbumPage() {
   }
 
   return (
-    <div className="pb-10">
+    <div className="pb-28">
       <PlaylistHeader
         playlist={{
           ...album,
           description: album.label,
           owner: {
-            display_name: album.artists
-              ?.map((a) => a.name)
-              .join(', '),
+            display_name:
+              album.artists
+                ?.map((artist) => artist.name)
+                .join(', ') || 'Spotify',
+          },
+          followers: {
+            total: 0,
+          },
+          tracks: {
+            total: tracks.length,
+            items: tracks,
           },
         }}
-        trackCount={tracks.length}
       />
 
       <PlaylistTracks
