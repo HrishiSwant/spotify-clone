@@ -21,22 +21,24 @@ async function spotifyFetch(endpoint, token, options = {}) {
   });
 
   console.log("Spotify Status:", response.status);
+  
 
   if (response.status === 204) {
     return null;
   }
 
-  const data = await response.json().catch(() => ({}));
+ const text = await response.text();
 
-  if (!response.ok) {
-    throw {
-      status: response.status,
-      message: data,
-    };
-  }
+console.log("Spotify Response:", text);
 
-  return data;
+if (!response.ok) {
+  throw {
+    status: response.status,
+    message: text,
+  };
 }
+
+return text ? JSON.parse(text) : null;
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
