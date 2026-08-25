@@ -92,7 +92,9 @@ export default function usePlayback() {
     return playback.queue();
   }
 
-  async function shufflePlayback(state = !shuffle) {
+  async function shufflePlayback(
+    state = !shuffle
+  ) {
     return playback.shuffle(state);
   }
 
