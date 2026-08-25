@@ -41,6 +41,9 @@ async function spotifyFetch(endpoint, token, options = {}) {
 export async function GET(request) {
   const session = await getServerSession(authOptions);
 
+  console.log("SESSION:", session);
+console.log("TOKEN:", session?.accessToken);
+
   if (!session?.accessToken) {
     return NextResponse.json(
       {
