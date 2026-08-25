@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { Play } from 'lucide-react';
+import { Play, Loader2 } from 'lucide-react';
 
 import usePlayback from '@/hooks/usePlayback';
 
@@ -14,14 +15,30 @@ export default function PlaylistCard({
 }) {
   const playback = usePlayback();
 
+  const [loading, setLoading] =
+    useState(false);
+
   async function handlePlay(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    await playback.playPlaylist(
-      playlist.uri,
-      0
-    );
+    if (loading) return;
+
+    try {
+      setLoading(true);
+
+      await playback.playPlaylist(
+        playlist.uri,
+        0
+      );
+    } catch (err) {
+      console.error(
+        'Unable to play playlist',
+        err
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -32,21 +49,27 @@ export default function PlaylistCard({
       <div className="relative">
 
         <img
-          src={getImage(
-            playlist.images
-          )}
+          src={getImage(playlist.images)}
           alt={playlist.name}
           className="aspect-square w-full rounded-md object-cover shadow-xl"
         />
 
         <button
           onClick={handlePlay}
-          className="absolute bottom-2 right-2 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-xl transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-105"
+          disabled={loading}
+          className="absolute bottom-2 right-2 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-xl transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-100"
         >
-          <Play
-            size={20}
-            fill="currentColor"
-          />
+          {loading ? (
+            <Loader2
+              size={20}
+              className="animate-spin"
+            />
+          ) : (
+            <Play
+              size={20}
+              fill="currentColor"
+            />
+          )}
         </button>
 
       </div>
@@ -60,5 +83,5 @@ export default function PlaylistCard({
           'Spotify Playlist'}
       </p>
     </Link>
-);
+  );
 }
