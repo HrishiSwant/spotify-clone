@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import {
   Heart,
   HeartOff,
+  Loader2,
   ListMusic,
   MonitorSpeaker,
   Mic2,
@@ -28,7 +29,8 @@ export default function Player() {
 
   const playback = usePlayback();
 
-  const [liked, setLiked] =
+  const [liked, setLiked] = useState(false);
+  const [loadingLike, setLoadingLike] =
     useState(false);
 
   useEffect(() => {
@@ -55,10 +57,17 @@ export default function Player() {
     }
 
     loadLiked();
-  }, [currentTrack]);
+  }, [currentTrack, playback]);
 
   async function toggleLike() {
-    if (!currentTrack?.id) return;
+    if (
+      !currentTrack?.id ||
+      loadingLike
+    ) {
+      return;
+    }
+
+    setLoadingLike(true);
 
     try {
       if (liked) {
@@ -76,6 +85,8 @@ export default function Player() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadingLike(false);
     }
   }
 
@@ -85,7 +96,6 @@ export default function Player() {
 
       {!currentTrack ? null : (
         <footer className="fixed bottom-0 left-0 right-0 z-50 h-[90px] border-t border-neutral-800 bg-[#181818]">
-
           <div className="grid h-full grid-cols-[320px_1fr_320px] items-center px-4">
 
             {/* LEFT */}
@@ -116,9 +126,15 @@ export default function Player() {
 
               <button
                 onClick={toggleLike}
-                className="text-neutral-400 transition hover:text-[#1DB954]"
+                disabled={loadingLike}
+                className="text-neutral-400 transition hover:text-[#1DB954] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {liked ? (
+                {loadingLike ? (
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
+                ) : liked ? (
                   <Heart
                     size={18}
                     fill="currentColor"
@@ -162,7 +178,6 @@ export default function Player() {
             </div>
 
           </div>
-
         </footer>
       )}
     </>
