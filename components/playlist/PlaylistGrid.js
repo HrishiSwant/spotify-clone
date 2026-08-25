@@ -5,7 +5,6 @@ import PlaylistCard from './PlaylistCard';
 export default function PlaylistGrid({
   playlists = [],
 }) {
-  // Remove null/undefined items and items without an id
   const validPlaylists = playlists.filter(
     (playlist) => playlist && playlist.id
   );
