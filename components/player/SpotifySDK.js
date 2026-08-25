@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { usePlayer } from '@/context/PlayerContext';
 import spotifyPlayer from '@/lib/spotify/player';
 
-export default function SpotifyPlayer() {
+export default function SpotifySDK() {
   const { data: session } = useSession();
 
   const {
@@ -15,6 +15,8 @@ export default function SpotifyPlayer() {
     setPlaying,
     setProgress,
     setDuration,
+    setVolume,
+    setQueue,
   } = usePlayer();
 
   useEffect(() => {
@@ -22,14 +24,15 @@ export default function SpotifyPlayer() {
 
     let player;
 
-    async function initialize() {
+    async function initializePlayer() {
       if (!window.Spotify) return;
 
       player = new window.Spotify.Player({
         name: 'Spotify Clone',
 
-        getOAuthToken: (cb) =>
-          cb(session.accessToken),
+        getOAuthToken: (cb) => {
+          cb(session.accessToken);
+        },
 
         volume: 0.8,
       });
@@ -37,6 +40,11 @@ export default function SpotifyPlayer() {
       player.addListener(
         'ready',
         async ({ device_id }) => {
+          console.log(
+            'Spotify Player Ready:',
+            device_id
+          );
+
           setDeviceId(device_id);
 
           try {
@@ -50,9 +58,24 @@ export default function SpotifyPlayer() {
       );
 
       player.addListener(
+        'not_ready',
+        ({ device_id }) => {
+          console.log(
+            'Device Offline:',
+            device_id
+          );
+        }
+      );
+
+      player.addListener(
         'player_state_changed',
         (state) => {
           if (!state) return;
+
+          const track =
+            state.track_window.current_track;
+
+          setCurrentTrack(track);
 
           setPlaying(!state.paused);
 
@@ -60,50 +83,85 @@ export default function SpotifyPlayer() {
 
           setDuration(state.duration);
 
-          setCurrentTrack(
-            state.track_window.current_track
+          setQueue(
+            state.track_window.next_tracks || []
           );
+
+          player
+            .getVolume()
+            .then((value) => {
+              setVolume(
+                Math.round(value * 100)
+              );
+            })
+            .catch(() => {});
         }
       );
 
       player.addListener(
         'initialization_error',
-        console.error
+        ({ message }) => {
+          console.error(
+            'Initialization Error:',
+            message
+          );
+        }
       );
 
       player.addListener(
         'authentication_error',
-        console.error
+        ({ message }) => {
+          console.error(
+            'Authentication Error:',
+            message
+          );
+        }
       );
 
       player.addListener(
         'account_error',
-        console.error
+        ({ message }) => {
+          console.error(
+            'Account Error:',
+            message
+          );
+        }
       );
 
       player.addListener(
         'playback_error',
-        console.error
+        ({ message }) => {
+          console.error(
+            'Playback Error:',
+            message
+          );
+        }
       );
 
-      await player.connect();
+      const connected =
+        await player.connect();
+
+      console.log(
+        'Spotify Connected:',
+        connected
+      );
 
       window.spotifyPlayer = player;
     }
 
     if (window.Spotify) {
-      initialize();
+      initializePlayer();
     } else {
-      window.addEventListener(
-        'spotify-sdk-ready',
-        initialize
-      );
+      window.onSpotifyWebPlaybackSDKReady =
+        initializePlayer;
     }
 
     return () => {
       if (player) {
         player.disconnect();
       }
+
+      window.spotifyPlayer = null;
     };
   }, [session]);
 
