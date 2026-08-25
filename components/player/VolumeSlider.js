@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import { usePlayer } from '@/context/PlayerContext';
+import usePlayback from '@/hooks/usePlayback';
 
 export default function VolumeSlider() {
   const {
@@ -15,6 +16,8 @@ export default function VolumeSlider() {
     setVolume,
     toggleMute,
   } = usePlayer();
+
+  const playback = usePlayback();
 
   function VolumeIcon() {
     if (muted || volume === 0) {
@@ -28,10 +31,36 @@ export default function VolumeSlider() {
     return <Volume2 size={18} />;
   }
 
+  async function handleVolumeChange(e) {
+    const value = Number(e.target.value);
+
+    try {
+      await setVolume(value);
+      await playback.volume(value);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleMute() {
+    try {
+      await toggleMute();
+
+      if (muted) {
+        await playback.volume(volume);
+      } else {
+        await playback.volume(0);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <div className="flex w-44 items-center gap-3">
+
       <button
-        onClick={toggleMute}
+        onClick={handleMute}
         className="text-neutral-400 transition hover:text-white"
       >
         <VolumeIcon />
@@ -42,11 +71,10 @@ export default function VolumeSlider() {
         min={0}
         max={100}
         value={muted ? 0 : volume}
-        onChange={(e) =>
-          setVolume(Number(e.target.value))
-        }
+        onChange={handleVolumeChange}
         className="h-1 w-full cursor-pointer accent-[#1DB954]"
       />
+
     </div>
   );
 }
