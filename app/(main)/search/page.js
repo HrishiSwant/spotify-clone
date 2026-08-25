@@ -14,6 +14,8 @@ export default function SearchPage() {
 
     tracks,
     playlists,
+    artists,
+    albums,
 
     search,
     loading,
@@ -25,11 +27,13 @@ export default function SearchPage() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, search]);
 
   const hasResults =
     tracks.length > 0 ||
-    playlists.length > 0;
+    playlists.length > 0 ||
+    artists.length > 0 ||
+    albums.length > 0;
 
   return (
     <div className="pb-28 px-8 pt-8">
@@ -58,27 +62,54 @@ export default function SearchPage() {
           </p>
         )}
 
-      {!loading && tracks.length > 0 && (
-        <>
-          <h2 className="mb-4 text-2xl font-bold">
-            Songs
-          </h2>
+      {!loading &&
+        tracks.length > 0 && (
+          <>
+            <h2 className="mb-4 text-2xl font-bold text-white">
+              Songs
+            </h2>
 
-          <PlaylistTracks
-            tracks={tracks}
-          />
-        </>
-      )}
+            <PlaylistTracks
+              tracks={tracks}
+            />
+          </>
+        )}
 
       {!loading &&
         playlists.length > 0 && (
           <>
-            <h2 className="mt-12 mb-4 text-2xl font-bold">
+            <h2 className="mt-12 mb-4 text-2xl font-bold text-white">
               Playlists
             </h2>
 
             <PlaylistGrid
               playlists={playlists}
+            />
+          </>
+        )}
+
+      {!loading &&
+        albums.length > 0 && (
+          <>
+            <h2 className="mt-12 mb-4 text-2xl font-bold text-white">
+              Albums
+            </h2>
+
+            <PlaylistGrid
+              playlists={albums}
+            />
+          </>
+        )}
+
+      {!loading &&
+        artists.length > 0 && (
+          <>
+            <h2 className="mt-12 mb-4 text-2xl font-bold text-white">
+              Artists
+            </h2>
+
+            <PlaylistGrid
+              playlists={artists}
             />
           </>
         )}
