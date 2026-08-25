@@ -8,8 +8,15 @@ export default function Header() {
   const router = useRouter();
   const { data: session } = useSession();
 
+  const avatar =
+    session?.user?.image ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      session?.user?.name || 'User'
+    )}&background=1DB954&color=fff`;
+
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 bg-[#121212]/90 backdrop-blur-md border-b border-white/5">
+    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-[#121212]/90 px-6 py-4 backdrop-blur-md">
+
       {/* Left */}
       <div className="flex items-center gap-2">
         <button
@@ -36,7 +43,11 @@ export default function Header() {
         {session?.user && (
           <>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() =>
+                signOut({
+                  callbackUrl: '/login',
+                })
+              }
               className="rounded-full bg-white px-4 py-2 font-semibold text-black transition hover:scale-105"
             >
               Log out
@@ -47,7 +58,7 @@ export default function Header() {
               className="flex items-center gap-2 rounded-full bg-black p-1 pr-3 transition hover:bg-neutral-800"
             >
               <img
-                src={session.user.image || '/default-avatar.png'}
+                src={avatar}
                 alt={session.user.name || 'Profile'}
                 className="h-8 w-8 rounded-full"
               />
