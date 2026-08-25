@@ -1,6 +1,7 @@
 'use client';
 
-import { Play, Clock3 } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Clock3, Loader2 } from 'lucide-react';
 
 import usePlayback from '@/hooks/usePlayback';
 
@@ -15,6 +16,8 @@ export default function PlaylistHeader({
 }) {
   const playback = usePlayback();
 
+  const [loading, setLoading] = useState(false);
+
   if (!playlist) return null;
 
   const tracks =
@@ -27,25 +30,30 @@ export default function PlaylistHeader({
   );
 
   async function handlePlay() {
-    await playback.playPlaylist(
-      playlist.uri,
-      0
-    );
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      await playback.playPlaylist(
+        playlist.uri,
+        0
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div>
-
       <div className="flex items-end gap-6 p-8">
-
         <img
           src={getImage(playlist.images)}
           alt={playlist.name}
-          className="h-60 w-60 rounded shadow-2xl object-cover"
+          className="h-60 w-60 rounded object-cover shadow-2xl"
         />
 
         <div>
-
           <p className="text-sm font-semibold uppercase">
             Playlist
           </p>
@@ -61,7 +69,6 @@ export default function PlaylistHeader({
           )}
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
-
             <span className="font-semibold text-white">
               {playlist.owner?.display_name}
             </span>
@@ -90,27 +97,29 @@ export default function PlaylistHeader({
                 totalDuration
               )}
             </span>
-
           </div>
-
         </div>
-
       </div>
 
       <div className="px-8 pb-6">
-
         <button
           onClick={handlePlay}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1DB954] text-black transition hover:scale-105"
+          disabled={loading}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1DB954] text-black transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          <Play
-            fill="currentColor"
-            size={26}
-          />
+          {loading ? (
+            <Loader2
+              size={26}
+              className="animate-spin"
+            />
+          ) : (
+            <Play
+              size={26}
+              fill="currentColor"
+            />
+          )}
         </button>
-
       </div>
-
     </div>
   );
 }
