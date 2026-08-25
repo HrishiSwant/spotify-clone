@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
-import useSpotify from './useSpotify';
+import searchApi from '@/lib/spotify/search';
 
 export default function useSearch() {
-  const spotify = useSpotify();
-
   const [query, setQuery] = useState('');
 
   const [tracks, setTracks] = useState([]);
@@ -14,11 +12,12 @@ export default function useSearch() {
   const [albums, setAlbums] = useState([]);
   const [playlists, setPlaylists] = useState([]);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  async function search(text) {
-    if (!text.trim()) {
+  const search = useCallback(async (text) => {
+    const value = text.trim();
+
+    if (!value) {
       setTracks([]);
       setArtists([]);
       setAlbums([]);
@@ -29,23 +28,23 @@ export default function useSearch() {
     try {
       setLoading(true);
 
-      const result = await spotify.search(text);
+      const result = await searchApi.search(value);
 
-      setTracks(result.tracks?.items || []);
-
-      setArtists(result.artists?.items || []);
-
-      setAlbums(result.albums?.items || []);
-
-      setPlaylists(
-        result.playlists?.items || []
-      );
+      setTracks(result?.tracks?.items || []);
+      setArtists(result?.artists?.items || []);
+      setAlbums(result?.albums?.items || []);
+      setPlaylists(result?.playlists?.items || []);
     } catch (err) {
       console.error(err);
+
+      setTracks([]);
+      setArtists([]);
+      setAlbums([]);
+      setPlaylists([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   return {
     query,
