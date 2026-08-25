@@ -23,7 +23,7 @@ export function PlayerProvider({ children }) {
   const [muted, setMuted] = useState(false);
 
   const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState('off');
+  const [repeat, setRepeat] = useState(false);
 
   const [deviceId, setDeviceId] = useState(null);
   const [playerReady, setPlayerReady] = useState(false);
@@ -98,15 +98,11 @@ export function PlayerProvider({ children }) {
   }
 
   function toggleShuffle() {
-    setShuffle((v) => !v);
+    setShuffle((prev) => !prev);
   }
 
   function toggleRepeat() {
-    setRepeat((prev) => {
-      if (prev === 'off') return 'context';
-      if (prev === 'context') return 'track';
-      return 'off';
-    });
+    setRepeat((prev) => !prev);
   }
 
   // ===========================
@@ -130,9 +126,7 @@ export function PlayerProvider({ children }) {
         if (!state) return;
 
         setPlaying(!state.paused);
-
         setProgress(state.position);
-
         setDuration(state.duration);
 
         if (state.track_window?.current_track) {
@@ -141,9 +135,7 @@ export function PlayerProvider({ children }) {
           );
         }
 
-        if (
-          state.track_window?.next_tracks
-        ) {
+        if (state.track_window?.next_tracks) {
           setQueue(
             state.track_window.next_tracks
           );
@@ -198,12 +190,15 @@ export function PlayerProvider({ children }) {
       setVolume,
 
       muted,
+      setMuted,
       toggleMute,
 
       shuffle,
+      setShuffle,
       toggleShuffle,
 
       repeat,
+      setRepeat,
       toggleRepeat,
 
       deviceId,
