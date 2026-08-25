@@ -3,15 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, notFound } from 'next/navigation';
 
-import useSpotify from '@/hooks/useSpotify';
+import artists from '@/lib/spotify/artists';
 
 import PlaylistHeader from '@/components/playlist/PlaylistHeader';
 import PlaylistTracks from '@/components/playlist/PlaylistTracks';
 
 export default function ArtistPage() {
   const { id } = useParams();
-
-  const spotify = useSpotify();
 
   const [artist, setArtist] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -28,8 +26,8 @@ export default function ArtistPage() {
 
         const [artistData, topTracks] =
           await Promise.all([
-            spotify.artist(id),
-            spotify.artistTopTracks(id),
+            artists.artist(id),
+            artists.artistTopTracks(id),
           ]);
 
         if (!artistData || artistData.error) {
@@ -38,7 +36,7 @@ export default function ArtistPage() {
         }
 
         setArtist(artistData);
-        setTracks(topTracks.tracks || []);
+        setTracks(topTracks?.tracks || []);
       } catch (err) {
         console.error(err);
         setError(true);
@@ -63,18 +61,24 @@ export default function ArtistPage() {
   }
 
   return (
-    <div className="pb-10">
+    <div className="pb-28">
       <PlaylistHeader
         playlist={{
           ...artist,
           owner: {
             display_name: 'Artist',
           },
-          description: `${
-            artist.followers?.total?.toLocaleString() || 0
-          } followers`,
+          description: `${(
+            artist.followers?.total || 0
+          ).toLocaleString()} followers`,
+          followers: {
+            total: artist.followers?.total || 0,
+          },
+          tracks: {
+            total: tracks.length,
+            items: tracks,
+          },
         }}
-        trackCount={tracks.length}
       />
 
       <PlaylistTracks
