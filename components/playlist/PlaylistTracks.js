@@ -1,6 +1,7 @@
 'use client';
 
-import { Play } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Loader2 } from 'lucide-react';
 
 import { usePlayer } from '@/context/PlayerContext';
 import usePlayback from '@/hooks/usePlayback';
@@ -22,16 +23,33 @@ export default function PlaylistTracks({
     playTrack,
   } = usePlayer();
 
-  async function handlePlay(track, index) {
-    playTrack(track, tracks);
+  const [loadingTrack, setLoadingTrack] =
+    useState(null);
 
-    if (contextUri) {
-      await playback.playPlaylist(
-        contextUri,
-        index
+  async function handlePlay(track, index) {
+    if (!track) return;
+
+    try {
+      setLoadingTrack(track.id);
+
+      // Update player context immediately
+      playTrack(track, tracks);
+
+      if (contextUri) {
+        await playback.playPlaylist(
+          contextUri,
+          index
+        );
+      } else {
+        await playback.playTrack(track);
+      }
+    } catch (err) {
+      console.error(
+        'Failed to play track',
+        err
       );
-    } else {
-      await playback.playTrack(track);
+    } finally {
+      setLoadingTrack(null);
     }
   }
 
@@ -39,17 +57,12 @@ export default function PlaylistTracks({
     <div className="mt-8">
 
       <div className="grid grid-cols-[40px_4fr_3fr_80px] gap-4 border-b border-neutral-800 px-6 py-2 text-xs uppercase tracking-wider text-neutral-400">
-
         <span>#</span>
-
         <span>Title</span>
-
         <span>Album</span>
-
         <span className="text-right">
           Time
         </span>
-
       </div>
 
       {tracks.map((item, index) => {
@@ -58,13 +71,17 @@ export default function PlaylistTracks({
         const active =
           currentTrack?.id === track.id;
 
+        const loading =
+          loadingTrack === track.id;
+
         return (
           <button
             key={`${track.id}-${index}`}
             onClick={() =>
               handlePlay(track, index)
             }
-            className={`group grid w-full grid-cols-[40px_4fr_3fr_80px] gap-4 px-6 py-2 text-left transition hover:bg-neutral-800 ${
+            disabled={loading}
+            className={`group grid w-full grid-cols-[40px_4fr_3fr_80px] gap-4 px-6 py-2 text-left transition hover:bg-neutral-800 disabled:opacity-60 ${
               active
                 ? 'text-[#1DB954]'
                 : 'text-white'
@@ -72,15 +89,24 @@ export default function PlaylistTracks({
           >
             <div className="flex items-center justify-center">
 
-              <span className="group-hover:hidden">
-                {index + 1}
-              </span>
+              {loading ? (
+                <Loader2
+                  size={15}
+                  className="animate-spin"
+                />
+              ) : (
+                <>
+                  <span className="group-hover:hidden">
+                    {index + 1}
+                  </span>
 
-              <Play
-                size={15}
-                className="hidden group-hover:block"
-                fill="currentColor"
-              />
+                  <Play
+                    size={15}
+                    className="hidden group-hover:block"
+                    fill="currentColor"
+                  />
+                </>
+              )}
 
             </div>
 
