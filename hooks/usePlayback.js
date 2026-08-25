@@ -6,12 +6,20 @@ import { usePlayer } from '@/context/PlayerContext';
 export default function usePlayback() {
   const {
     deviceId,
+
     currentTrack,
     playing,
+
+    shuffle,
+    repeat,
+
+    playTrack: setCurrentTrack,
   } = usePlayer();
 
   async function playTrack(track) {
     if (!track?.uri || !deviceId) return;
+
+    setCurrentTrack(track);
 
     return playback.playTrack(
       track.uri,
@@ -38,6 +46,14 @@ export default function usePlayback() {
 
   async function pause() {
     return playback.pause();
+  }
+
+  async function togglePlayback() {
+    if (playing) {
+      return pause();
+    }
+
+    return resume();
   }
 
   async function next() {
@@ -68,8 +84,40 @@ export default function usePlayback() {
     return playback.currentPlayback();
   }
 
+  async function currentlyPlaying() {
+    return playback.currentlyPlaying();
+  }
+
   async function queue() {
     return playback.queue();
+  }
+
+  async function shufflePlayback(state = !shuffle) {
+    return playback.shuffle(state);
+  }
+
+  async function repeatPlayback(
+    state = repeat ? 'off' : 'context'
+  ) {
+    return playback.repeat(state);
+  }
+
+  async function likeTrack(trackId) {
+    if (!trackId) return;
+
+    return playback.like(trackId);
+  }
+
+  async function unlikeTrack(trackId) {
+    if (!trackId) return;
+
+    return playback.unlike(trackId);
+  }
+
+  async function isTrackLiked(trackId) {
+    if (!trackId) return false;
+
+    return playback.checkSaved(trackId);
   }
 
   return {
@@ -83,19 +131,27 @@ export default function usePlayback() {
 
     resume,
     pause,
+    togglePlayback,
 
     next,
     previous,
 
     seek,
-
     volume,
 
     devices,
     transfer,
 
     currentPlayback,
+    currentlyPlaying,
 
     queue,
+
+    shuffle: shufflePlayback,
+    repeat: repeatPlayback,
+
+    likeTrack,
+    unlikeTrack,
+    isTrackLiked,
   };
 }
