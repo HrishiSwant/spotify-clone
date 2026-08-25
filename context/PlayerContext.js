@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -22,31 +23,49 @@ export function PlayerProvider({ children }) {
   const [muted, setMuted] = useState(false);
 
   const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
+  const [repeat, setRepeat] = useState('off');
 
   const [deviceId, setDeviceId] = useState(null);
+  const [playerReady, setPlayerReady] = useState(false);
+
+  // ===========================
+  // Track Helpers
+  // ===========================
 
   function playTrack(track, trackQueue = []) {
+    if (!track) return;
+
     setCurrentTrack(track);
     setQueue(trackQueue);
 
     setPlaying(true);
     setProgress(0);
-    setDuration(track?.duration_ms || 0);
+    setDuration(track.duration_ms || 0);
   }
+
+  function stopTrack() {
+    setPlaying(false);
+  }
+
+  // ===========================
+  // Spotify SDK Controls
+  // ===========================
 
   async function togglePlayback() {
     if (!window.spotifyPlayer) return;
+
     await window.spotifyPlayer.togglePlay();
   }
 
   async function nextTrack() {
     if (!window.spotifyPlayer) return;
+
     await window.spotifyPlayer.nextTrack();
   }
 
   async function previousTrack() {
     if (!window.spotifyPlayer) return;
+
     await window.spotifyPlayer.previousTrack();
   }
 
@@ -58,11 +77,11 @@ export function PlayerProvider({ children }) {
     }
   }
 
-  async function setVolume(volume) {
-    setVolumeState(volume);
+  async function setVolume(value) {
+    setVolumeState(value);
 
     if (window.spotifyPlayer) {
-      await window.spotifyPlayer.setVolume(volume / 100);
+      await window.spotifyPlayer.setVolume(value / 100);
     }
   }
 
@@ -83,8 +102,80 @@ export function PlayerProvider({ children }) {
   }
 
   function toggleRepeat() {
-    setRepeat((v) => !v);
+    setRepeat((prev) => {
+      if (prev === 'off') return 'context';
+      if (prev === 'context') return 'track';
+      return 'off';
+    });
   }
+
+  // ===========================
+  // Listen for SDK State Changes
+  // ===========================
+
+  useEffect(() => {
+    if (!window.spotifyPlayer) return;
+
+    const player = window.spotifyPlayer;
+
+    player.addListener('ready', ({ device_id }) => {
+      console.log('Spotify Ready:', device_id);
+      setDeviceId(device_id);
+      setPlayerReady(true);
+    });
+
+    player.addListener(
+      'player_state_changed',
+      (state) => {
+        if (!state) return;
+
+        setPlaying(!state.paused);
+
+        setProgress(state.position);
+
+        setDuration(state.duration);
+
+        if (state.track_window?.current_track) {
+          setCurrentTrack(
+            state.track_window.current_track
+          );
+        }
+
+        if (
+          state.track_window?.next_tracks
+        ) {
+          setQueue(
+            state.track_window.next_tracks
+          );
+        }
+      }
+    );
+
+    return () => {
+      player.removeListener('ready');
+      player.removeListener(
+        'player_state_changed'
+      );
+    };
+  }, []);
+
+  // ===========================
+  // Auto Progress
+  // ===========================
+
+  useEffect(() => {
+    if (!playing) return;
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= duration) return duration;
+
+        return prev + 1000;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [playing, duration]);
 
   const value = useMemo(
     () => ({
@@ -118,7 +209,10 @@ export function PlayerProvider({ children }) {
       deviceId,
       setDeviceId,
 
+      playerReady,
+
       playTrack,
+      stopTrack,
 
       togglePlayback,
       nextTrack,
@@ -137,6 +231,7 @@ export function PlayerProvider({ children }) {
       shuffle,
       repeat,
       deviceId,
+      playerReady,
     ]
   );
 
@@ -148,5 +243,13 @@ export function PlayerProvider({ children }) {
 }
 
 export function usePlayer() {
-  return useContext(PlayerContext);
+  const context = useContext(PlayerContext);
+
+  if (!context) {
+    throw new Error(
+      'usePlayer must be used inside PlayerProvider'
+    );
+  }
+
+  return context;
 }
