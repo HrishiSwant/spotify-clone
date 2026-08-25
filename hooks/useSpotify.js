@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+
 import client from '@/lib/spotify/client';
 
 export default function useSpotify() {
@@ -32,9 +33,12 @@ export default function useSpotify() {
     return client.get('recentlyPlayed');
   }, []);
 
-  // Spotify API route doesn't currently support this
   const followedArtists = useCallback(() => {
-    return Promise.resolve({ artists: { items: [] } });
+    return Promise.resolve({
+      artists: {
+        items: [],
+      },
+    });
   }, []);
 
   // ==========================
@@ -61,12 +65,10 @@ export default function useSpotify() {
     return client.byId('playlist', id);
   }, []);
 
-  // Not implemented in API route yet
   const playlistTracks = useCallback((id) => {
     return client.byId('playlist', id);
   }, []);
 
-  // Not implemented in API route yet
   const playlistCover = useCallback((id) => {
     return client.byId('playlist', id);
   }, []);
@@ -95,12 +97,10 @@ export default function useSpotify() {
     return client.byId('artistTopTracks', id);
   }, []);
 
-  // Not implemented in API route yet
   const artistAlbums = useCallback((id) => {
     return client.byId('artist', id);
   }, []);
 
-  // Not implemented in API route yet
   const relatedArtists = useCallback((id) => {
     return client.byId('artist', id);
   }, []);
@@ -109,24 +109,24 @@ export default function useSpotify() {
   // SEARCH
   // ==========================
 
-  const search = useCallback((q) => {
-    return client.search(q);
+  const search = useCallback((query) => {
+    return client.search(query);
   }, []);
 
-  const searchTracks = useCallback((q) => {
-    return client.search(q);
+  const searchTracks = useCallback((query) => {
+    return client.search(query);
   }, []);
 
-  const searchArtists = useCallback((q) => {
-    return client.search(q);
+  const searchArtists = useCallback((query) => {
+    return client.search(query);
   }, []);
 
-  const searchAlbums = useCallback((q) => {
-    return client.search(q);
+  const searchAlbums = useCallback((query) => {
+    return client.search(query);
   }, []);
 
-  const searchPlaylists = useCallback((q) => {
-    return client.search(q);
+  const searchPlaylists = useCallback((query) => {
+    return client.search(query);
   }, []);
 
   // ==========================
@@ -145,7 +145,12 @@ export default function useSpotify() {
     return client.get('devices');
   }, []);
 
+  const queue = useCallback(() => {
+    return client.get('queue');
+  }, []);
+
   return {
+    // User
     me,
     myPlaylists,
     savedTracks,
@@ -154,30 +159,37 @@ export default function useSpotify() {
     recentlyPlayed,
     followedArtists,
 
+    // Home
     featured,
     newReleases,
     categories,
 
+    // Playlist
     playlist,
     playlistTracks,
     playlistCover,
 
+    // Album
     album,
     albumTracks,
 
+    // Artist
     artist,
     artistTopTracks,
     artistAlbums,
     relatedArtists,
 
+    // Search
     search,
     searchTracks,
     searchArtists,
     searchAlbums,
     searchPlaylists,
 
+    // Player
     player,
     currentlyPlaying,
     devices,
+    queue,
   };
 }
