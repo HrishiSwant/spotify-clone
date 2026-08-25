@@ -10,24 +10,78 @@ import {
 } from 'lucide-react';
 
 import { usePlayer } from '@/context/PlayerContext';
+import usePlayback from '@/hooks/usePlayback';
 
 export default function Controls() {
   const {
     playing,
-    togglePlayback,
-    nextTrack,
-    previousTrack,
     shuffle,
     repeat,
+    setPlaying,
     toggleShuffle,
     toggleRepeat,
   } = usePlayer();
+
+  const playback = usePlayback();
+
+  async function handlePlayPause() {
+    try {
+      await playback.togglePlayback();
+      setPlaying(!playing);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleNext() {
+    try {
+      await playback.next();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handlePrevious() {
+    try {
+      await playback.previous();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleShuffle() {
+    try {
+      const newState = !shuffle;
+
+      toggleShuffle();
+
+      await playback.shuffle(newState);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleRepeat() {
+    try {
+      const newState = !repeat;
+
+      toggleRepeat();
+
+      await playback.repeat(
+        newState
+          ? 'context'
+          : 'off'
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div className="flex items-center gap-5">
 
       <button
-        onClick={toggleShuffle}
+        onClick={handleShuffle}
         className={
           shuffle
             ? 'text-[#1DB954]'
@@ -38,7 +92,7 @@ export default function Controls() {
       </button>
 
       <button
-        onClick={previousTrack}
+        onClick={handlePrevious}
         className="text-neutral-300 hover:text-white"
       >
         <SkipBack
@@ -48,7 +102,7 @@ export default function Controls() {
       </button>
 
       <button
-        onClick={togglePlayback}
+        onClick={handlePlayPause}
         className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
       >
         {playing ? (
@@ -65,7 +119,7 @@ export default function Controls() {
       </button>
 
       <button
-        onClick={nextTrack}
+        onClick={handleNext}
         className="text-neutral-300 hover:text-white"
       >
         <SkipForward
@@ -75,7 +129,7 @@ export default function Controls() {
       </button>
 
       <button
-        onClick={toggleRepeat}
+        onClick={handleRepeat}
         className={
           repeat
             ? 'text-[#1DB954]'
