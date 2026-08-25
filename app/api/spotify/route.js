@@ -39,6 +39,7 @@ if (!response.ok) {
 }
 
 return text ? JSON.parse(text) : null;
+}
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
