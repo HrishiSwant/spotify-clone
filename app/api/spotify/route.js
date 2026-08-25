@@ -22,22 +22,11 @@ async function spotifyFetch(endpoint, token, options = {}) {
 
   console.log("Spotify Status:", response.status);
 
-console.log("Spotify Headers:");
-console.log(
-  Object.fromEntries(response.headers.entries())
-);
-
-  console.log("Spotify Status:", response.status);
-
   if (response.status === 204) {
-    console.log("Spotify returned 204 No Content");
     return null;
   }
 
   const data = await response.json().catch(() => ({}));
-
-  console.log("Spotify Response:");
-  console.log(JSON.stringify(data, null, 2));
 
   if (!response.ok) {
     throw {
@@ -50,15 +39,9 @@ console.log(
 }
 
 export async function GET(request) {
-  console.log("========== GET /api/spotify ==========");
-
   const session = await getServerSession(authOptions);
 
-  console.log("Session exists:", !!session);
-  console.log("Access Token exists:", !!session?.accessToken);
-
   if (!session?.accessToken) {
-    console.log("Unauthorized request");
     return NextResponse.json(
       {
         success: false,
@@ -78,20 +61,14 @@ export async function GET(request) {
   const id = searchParams.get("id");
   const q = searchParams.get("q");
 
-  console.log("Action:", action);
-  console.log("ID:", id);
-  console.log("Query:", q);
-
   try {
     switch (action) {
       case "me":
-        console.log("Calling /me");
         return NextResponse.json(
           await spotifyFetch("/me", token)
         );
 
       case "featured":
-        console.log("Calling /me/playlists");
         return NextResponse.json(
           await spotifyFetch(
             "/me/playlists?limit=20",
@@ -100,7 +77,6 @@ export async function GET(request) {
         );
 
       case "newReleases":
-        console.log("Calling /browse/new-releases");
         return NextResponse.json(
           await spotifyFetch(
             "/browse/new-releases?limit=20",
@@ -109,7 +85,6 @@ export async function GET(request) {
         );
 
       case "categories":
-        console.log("Calling /browse/categories");
         return NextResponse.json(
           await spotifyFetch(
             "/browse/categories?limit=20",
@@ -118,7 +93,6 @@ export async function GET(request) {
         );
 
       case "playlist":
-        console.log("Playlist:", id);
         return NextResponse.json(
           await spotifyFetch(
             `/playlists/${id}?market=from_token`,
@@ -127,7 +101,6 @@ export async function GET(request) {
         );
 
       case "album":
-        console.log("Album:", id);
         return NextResponse.json(
           await spotifyFetch(
             `/albums/${id}`,
@@ -136,7 +109,6 @@ export async function GET(request) {
         );
 
       case "albumTracks":
-        console.log("Album Tracks:", id);
         return NextResponse.json(
           await spotifyFetch(
             `/albums/${id}/tracks`,
@@ -145,7 +117,6 @@ export async function GET(request) {
         );
 
       case "artist":
-        console.log("Artist:", id);
         return NextResponse.json(
           await spotifyFetch(
             `/artists/${id}`,
@@ -154,7 +125,6 @@ export async function GET(request) {
         );
 
       case "artistTopTracks":
-        console.log("Artist Top Tracks:", id);
         return NextResponse.json(
           await spotifyFetch(
             `/artists/${id}/top-tracks?market=from_token`,
@@ -163,7 +133,6 @@ export async function GET(request) {
         );
 
       case "savedTracks":
-        console.log("Saved Tracks");
         return NextResponse.json(
           await spotifyFetch(
             "/me/tracks?limit=50",
@@ -172,7 +141,6 @@ export async function GET(request) {
         );
 
       case "myPlaylists":
-        console.log("My Playlists");
         return NextResponse.json(
           await spotifyFetch(
             "/me/playlists?limit=50",
@@ -181,7 +149,6 @@ export async function GET(request) {
         );
 
       case "recentlyPlayed":
-        console.log("Recently Played");
         return NextResponse.json(
           await spotifyFetch(
             "/me/player/recently-played?limit=50",
@@ -190,7 +157,6 @@ export async function GET(request) {
         );
 
       case "topTracks":
-        console.log("Top Tracks");
         return NextResponse.json(
           await spotifyFetch(
             "/me/top/tracks?limit=20",
@@ -199,7 +165,6 @@ export async function GET(request) {
         );
 
       case "topArtists":
-        console.log("Top Artists");
         return NextResponse.json(
           await spotifyFetch(
             "/me/top/artists?limit=20",
@@ -208,36 +173,31 @@ export async function GET(request) {
         );
 
       case "search": {
-  console.log("Searching:", q);
+        if (!q) {
+          return NextResponse.json({
+            tracks: { items: [] },
+            artists: { items: [] },
+            albums: { items: [] },
+            playlists: { items: [] },
+          });
+        }
 
-  if (!q) {
-    return NextResponse.json({
-      tracks: { items: [] },
-      artists: { items: [] },
-      albums: { items: [] },
-      playlists: { items: [] },
-    });
-  }
+        const result = await spotifyFetch(
+          `/search?q=${encodeURIComponent(
+            q
+          )}&type=track,artist,album,playlist&limit=10`,
+          token
+        );
 
-  const endpoint = `/search?q=${encodeURIComponent(
-    q
-  )}&type=track,artist,album,playlist&limit=10`;
-
-  console.log("Final Search URL:");
-  console.log(`${BASE_URL}${endpoint}`);
-
-  const result = await spotifyFetch(endpoint, token);
-
-  return NextResponse.json({
-    tracks: result?.tracks || { items: [] },
-    artists: result?.artists || { items: [] },
-    albums: result?.albums || { items: [] },
-    playlists: result?.playlists || { items: [] },
-  });
-}
+        return NextResponse.json({
+          tracks: result?.tracks || { items: [] },
+          artists: result?.artists || { items: [] },
+          albums: result?.albums || { items: [] },
+          playlists: result?.playlists || { items: [] },
+        });
+      }
 
       case "devices":
-        console.log("Devices");
         return NextResponse.json(
           await spotifyFetch(
             "/me/player/devices",
@@ -246,7 +206,6 @@ export async function GET(request) {
         );
 
       case "currentPlayback":
-        console.log("Current Playback");
         return NextResponse.json(
           await spotifyFetch(
             "/me/player",
@@ -255,7 +214,6 @@ export async function GET(request) {
         );
 
       case "currentlyPlaying":
-        console.log("Currently Playing");
         return NextResponse.json(
           await spotifyFetch(
             "/me/player/currently-playing",
@@ -264,7 +222,6 @@ export async function GET(request) {
         );
 
       case "queue":
-        console.log("Queue");
         return NextResponse.json(
           await spotifyFetch(
             "/me/player/queue",
@@ -272,9 +229,15 @@ export async function GET(request) {
           )
         );
 
-      default:
-        console.log("Unknown action:", action);
+      case "checkSaved":
+        return NextResponse.json(
+          await spotifyFetch(
+            `/me/tracks/contains?ids=${id}`,
+            token
+          )
+        );
 
+      default:
         return NextResponse.json(
           {
             success: false,
@@ -286,15 +249,11 @@ export async function GET(request) {
         );
     }
   } catch (err) {
-    console.log("Spotify Error:");
-    console.log(JSON.stringify(err, null, 2));
-
     return NextResponse.json(err, {
       status: err.status || 500,
     });
   }
 }
-
 export async function PUT(request) {
   const session = await getServerSession(authOptions);
 
@@ -306,38 +265,72 @@ export async function PUT(request) {
   }
 
   const token = session.accessToken;
+
   const { searchParams } = new URL(request.url);
+
   const action = searchParams.get("action");
 
-  const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({}));
 
   try {
     switch (action) {
-      case "transfer":
-        await spotifyFetch("/me/player", token, {
-          method: "PUT",
-          body: JSON.stringify({
-            device_ids: [body.deviceId],
-          }),
+
+        case "transfer":
+  await spotifyFetch("/me/player", token, {
+    method: "PUT",
+    body: JSON.stringify({
+      device_ids: [body.deviceId],
+    }),
+  });
+  break;
+
+case "play":
+  await spotifyFetch("/me/player/play", token, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+  break;
+
+case "pause":
+  await spotifyFetch("/me/player/pause", token, {
+    method: "PUT",
+  });
+  break;
+
+case "seek":
+  await spotifyFetch(
+    `/me/player/seek?position_ms=${searchParams.get("position")}`,
+    token,
+    {
+      method: "PUT",
+    }
+  );
+  break;
+
+case "volume":
+  await spotifyFetch(
+    `/me/player/volume?volume_percent=${searchParams.get("volume")}`,
+    token,
+    {
+      method: "PUT",
+    }
+  );
+  break;
+      case "next":
+        await spotifyFetch("/me/player/next", token, {
+          method: "POST",
         });
         break;
 
-      case "play":
-        await spotifyFetch("/me/player/play", token, {
-          method: "PUT",
-          body: JSON.stringify(body),
+      case "previous":
+        await spotifyFetch("/me/player/previous", token, {
+          method: "POST",
         });
         break;
 
-      case "pause":
-        await spotifyFetch("/me/player/pause", token, {
-          method: "PUT",
-        });
-        break;
-
-      case "seek":
+      case "shuffle":
         await spotifyFetch(
-          `/me/player/seek?position_ms=${searchParams.get("position")}`,
+          `/me/player/shuffle?state=${body.state}`,
           token,
           {
             method: "PUT",
@@ -345,15 +338,52 @@ export async function PUT(request) {
         );
         break;
 
-      case "volume":
+      case "repeat":
         await spotifyFetch(
-          `/me/player/volume?volume_percent=${searchParams.get("volume")}`,
+          `/me/player/repeat?state=${body.state}`,
           token,
           {
             method: "PUT",
           }
         );
         break;
+
+      case "like":
+        await spotifyFetch(
+          "/me/tracks",
+          token,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              ids: body.ids,
+            }),
+          }
+        );
+        break;
+
+      case "unlike":
+        await spotifyFetch(
+          "/me/tracks",
+          token,
+          {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: body.ids,
+            }),
+          }
+        );
+        break;
+
+      default:
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Unknown action",
+          },
+          {
+            status: 400,
+          }
+        );
     }
 
     return NextResponse.json({
@@ -367,39 +397,52 @@ export async function PUT(request) {
     });
   }
 }
-
 export async function POST(request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {
-    return NextResponse.json({}, {
-      status: 401,
-    });
+    return NextResponse.json(
+      { success: false },
+      { status: 401 }
+    );
   }
 
   const token = session.accessToken;
+
   const { searchParams } = new URL(request.url);
+
   const action = searchParams.get("action");
 
   try {
-    if (action === "next") {
-      await spotifyFetch("/me/player/next", token, {
-        method: "POST",
-      });
-    }
+    switch (action) {
+      case "next":
+        await spotifyFetch("/me/player/next", token, {
+          method: "POST",
+        });
+        break;
 
-    if (action === "previous") {
-      await spotifyFetch("/me/player/previous", token, {
-        method: "POST",
-      });
+      case "previous":
+        await spotifyFetch("/me/player/previous", token, {
+          method: "POST",
+        });
+        break;
+
+      default:
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Unknown action",
+          },
+          {
+            status: 400,
+          }
+        );
     }
 
     return NextResponse.json({
       success: true,
     });
   } catch (err) {
-    console.log(JSON.stringify(err, null, 2));
-
     return NextResponse.json(err, {
       status: err.status || 500,
     });
