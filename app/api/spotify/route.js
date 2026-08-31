@@ -1,6 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+  return NextResponse.json({
+    hello: "spotify"
+  });
+}
+
 import { authOptions } from "@/lib/auth";
 
 const BASE_URL = "https://api.spotify.com/v1";
