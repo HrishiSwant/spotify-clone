@@ -290,12 +290,24 @@ export async function PUT(request) {
   });
   break;
 
-case "play":
-  await spotifyFetch("/me/player/play", token, {
-    method: "PUT",
-    body: JSON.stringify(body),
-  });
+case "play": {
+  const deviceId = searchParams.get("device_id");
+
+  await spotifyFetch(
+    `/me/player/play${
+      deviceId
+        ? `?device_id=${deviceId}`
+        : ""
+    }`,
+    token,
+    {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }
+  );
+
   break;
+}
 
 case "pause":
   await spotifyFetch("/me/player/pause", token, {
