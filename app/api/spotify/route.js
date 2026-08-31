@@ -297,7 +297,7 @@ case "play": {
   await spotifyFetch(
     `/me/player/play${
       deviceId
-        ? `?device_id=${deviceId}`
+        ? `?device_id=${encodeURIComponent(deviceId)}`
         : ""
     }`,
     token,
@@ -310,11 +310,23 @@ case "play": {
   break;
 }
 
-case "pause":
-  await spotifyFetch("/me/player/pause", token, {
-    method: "PUT",
-  });
+case "pause": {
+  const deviceId = searchParams.get("device_id");
+
+  await spotifyFetch(
+    `/me/player/pause${
+      deviceId
+        ? `?device_id=${encodeURIComponent(deviceId)}`
+        : ""
+    }`,
+    token,
+    {
+      method: "PUT",
+    }
+  );
+
   break;
+}
 
 case "seek":
   await spotifyFetch(
@@ -335,17 +347,23 @@ case "volume":
     }
   );
   break;
-      case "next":
-        await spotifyFetch("/me/player/next", token, {
-          method: "POST",
-        });
-        break;
+        case "next": {
+  const deviceId = searchParams.get("device_id");
 
-      case "previous":
-        await spotifyFetch("/me/player/previous", token, {
-          method: "POST",
-        });
-        break;
+  await spotifyFetch(
+    `/me/player/next${
+      deviceId
+        ? `?device_id=${encodeURIComponent(deviceId)}`
+        : ""
+    }`,
+    token,
+    {
+      method: "POST",
+    }
+  );
+
+  break;
+}
 
       case "shuffle":
         await spotifyFetch(
@@ -440,11 +458,23 @@ export async function POST(request) {
         });
         break;
 
-      case "previous":
-        await spotifyFetch("/me/player/previous", token, {
-          method: "POST",
-        });
-        break;
+     case "previous": {
+  const deviceId = searchParams.get("device_id");
+
+  await spotifyFetch(
+    `/me/player/previous${
+      deviceId
+        ? `?device_id=${encodeURIComponent(deviceId)}`
+        : ""
+    }`,
+    token,
+    {
+      method: "POST",
+    }
+  );
+
+  break;
+}
 
       default:
         return NextResponse.json(
