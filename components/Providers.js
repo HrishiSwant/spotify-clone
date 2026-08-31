@@ -7,6 +7,8 @@ import { PlayerProvider } from '@/context/PlayerContext';
 import { QueueProvider } from '@/context/QueueContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 
+import SpotifySDK from '@/components/player/SpotifySDK';
+
 export default function Providers({ children }) {
   return (
     <SessionProvider>
@@ -14,7 +16,12 @@ export default function Providers({ children }) {
         <AuthProvider>
           <QueueProvider>
             <PlayerProvider>
+
+              {/* Initialize Spotify Web Playback SDK */}
+              <SpotifySDK />
+
               {children}
+
             </PlayerProvider>
           </QueueProvider>
         </AuthProvider>
