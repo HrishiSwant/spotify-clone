@@ -286,6 +286,7 @@ export async function PUT(request) {
     method: "PUT",
     body: JSON.stringify({
       device_ids: [body.deviceId],
+      play: true,
     }),
   });
   break;
