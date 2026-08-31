@@ -6,20 +6,33 @@ import { usePlayer } from '@/context/PlayerContext';
 export default function usePlayback() {
   const {
     deviceId,
-
     currentTrack,
     playing,
-
     shuffle,
     repeat,
-
-    playTrack: setCurrentTrack,
+    playTrack: updateCurrentTrack,
   } = usePlayer();
 
-  async function playTrack(track) {
-    if (!track?.uri || !deviceId) return;
+  async function ensureDevice() {
+    if (!deviceId) {
+      throw new Error('Spotify device is not ready');
+    }
 
-    setCurrentTrack(track);
+    // Make sure playback is transferred to the browser player
+    await playback.transfer(deviceId);
+
+    // Give Spotify a moment to activate the device
+    await new Promise((resolve) =>
+      setTimeout(resolve, 400)
+    );
+  }
+
+  async function playTrack(track) {
+    if (!track?.uri) return;
+
+    await ensureDevice();
+
+    updateCurrentTrack(track);
 
     return playback.playTrack(
       track.uri,
@@ -31,7 +44,9 @@ export default function usePlayback() {
     playlistUri,
     offset = 0
   ) {
-    if (!playlistUri || !deviceId) return;
+    if (!playlistUri) return;
+
+    await ensureDevice();
 
     return playback.playContext(
       playlistUri,
@@ -41,6 +56,8 @@ export default function usePlayback() {
   }
 
   async function resume() {
+    await ensureDevice();
+
     return playback.resume(deviceId);
   }
 
