@@ -27,28 +27,60 @@ export default function PlaylistTracks({
     useState(null);
 
   async function handlePlay(track, index) {
-    if (!track) return;
+    console.log('STEP 1 - handlePlay called');
+
+    if (!track) {
+      console.log('No track');
+      return;
+    }
 
     try {
+      console.log('STEP 2 - Track:', track);
+
       setLoadingTrack(track.id);
+
+      console.log('STEP 3 - Updating PlayerContext');
 
       // Update player context immediately
       playTrack(track, tracks);
 
+      console.log('STEP 4 - PlayerContext updated');
+
       if (contextUri) {
+        console.log(
+          'STEP 5 - Calling playback.playPlaylist()',
+          contextUri,
+          index
+        );
+
         await playback.playPlaylist(
           contextUri,
           index
         );
+
+        console.log(
+          'STEP 6 - playPlaylist finished'
+        );
       } else {
+        console.log(
+          'STEP 5 - Calling playback.playTrack()',
+          track.uri
+        );
+
         await playback.playTrack(track);
+
+        console.log(
+          'STEP 6 - playTrack finished'
+        );
       }
     } catch (err) {
       console.error(
-        'Failed to play track',
+        'STEP ERROR - Failed to play track',
         err
       );
     } finally {
+      console.log('STEP 7 - Finished');
+
       setLoadingTrack(null);
     }
   }
