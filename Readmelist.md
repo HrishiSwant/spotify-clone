@@ -13,6 +13,8 @@ Playback controls
 Queue & Now Playing
 Polish, responsiveness, and testing
 
+           hooks/usePlayback.js    components/playlist/PlaylistTracks.js      public/spotify-player.js
+
 
 
 
